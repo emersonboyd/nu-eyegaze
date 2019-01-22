@@ -2,6 +2,8 @@ import numpy as np
 import cv2 as cv
 import glob
 
+import util
+
 # following this tutorial:
 # https://docs.opencv.org/4.0.0/dc/dbb/tutorial_py_calibration.html
 
@@ -19,10 +21,15 @@ objp[:,:2] = np.mgrid[0:num_rows, 0:num_cols].T.reshape(-1,2)
 # Arrays to store object points and image points from all the images.
 objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
-images = glob.glob('../res/picam_calib_twisttie/*.jpg')
+images = glob.glob('{}/iphone_6_plus_emerson_calib/*.JPG'.format(util.get_resources_directory()))
 
+
+
+
+print('Finding corners in image dataset...')
 for fname in images:
     img = cv.imread(fname)
+    img = cv.resize(img, (0,0), fx=0.3, fy=0.3) 
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
     # Find the chess board corners
@@ -37,9 +44,9 @@ for fname in images:
         imgpoints.append(corners)
 
         # Draw and display the corners
-        cv.drawChessboardCorners(img, (num_rows, num_cols), corners2, ret)
-        cv.imshow(fname, img)
-        cv.waitKey(5000)
+        # cv.drawChessboardCorners(img, (num_rows, num_cols), corners2, ret)
+        # cv.imshow(fname, img)
+        # cv.waitKey(500)
 
     else:
         print('Failed to find corners for', fname)
@@ -51,19 +58,23 @@ cv.destroyAllWindows()
 
 
 print('Calculating camera calibration matrix...')
+# TODO the gray.shape could be buggy because it's using image dimensions from the last acquired image
 ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
 
 
 
-print('Undistorting the picam photos...')
+print('Undistorting the photos...')
 for fname in images:
     img = cv.imread(fname)
+    img = cv.resize(img, (0,0), fx=0.3, fy=0.3) 
     h, w = img.shape[:2]
     newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (w,h), 1, (w,h))
 
-    print(newcameramtx)
-    print(roi)
+    # check for errors
+    if (roi[0] == 0 and roi[1] == 0 and roi[2] == 0 and roi[3] == 0):
+        print('Failed to get valid roi for', fname)
+        exit(1)
 
     # undistort
     dst = cv.undistort(img, mtx, dist, None, newcameramtx)
@@ -71,10 +82,7 @@ for fname in images:
     # crop the image based on valid pixels calculated from getOptimalNewCameraMatrix()
     x, y, w, h = roi
     dst = dst[y:y+h, x:x+w]
-    cv.imwrite('calibresult.png', dst)
-
-    # # Draw the image
-    # cv.imshow('img'. )
+    cv.imwrite('{}/calibresult_{}.png'.format(util.get_output_directory(), fname.split('/')[-1]), dst)
 
 
 
