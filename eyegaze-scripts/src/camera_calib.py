@@ -7,6 +7,11 @@ import util
 # following this tutorial:
 # https://docs.opencv.org/4.0.0/dc/dbb/tutorial_py_calibration.html
 
+# resize_images = True
+# input_path = 'iphone_6_plus_emerson_calib/*.JPG'
+resize_images = False
+input_path = 'picam_calib_twisttie/*.jpg'
+
 # these numbers indicated the number of interior corners
 num_rows = 8
 num_cols = 6
@@ -21,7 +26,7 @@ objp[:,:2] = np.mgrid[0:num_rows, 0:num_cols].T.reshape(-1,2)
 # Arrays to store object points and image points from all the images.
 objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
-images = glob.glob('{}/iphone_6_plus_emerson_calib/*.JPG'.format(util.get_resources_directory()))
+images = glob.glob('{}/{}'.format(util.get_resources_directory(), input_path))
 
 
 
@@ -29,7 +34,8 @@ images = glob.glob('{}/iphone_6_plus_emerson_calib/*.JPG'.format(util.get_resour
 print('Finding corners in image dataset...')
 for fname in images:
     img = cv.imread(fname)
-    img = cv.resize(img, (0,0), fx=0.3, fy=0.3) 
+    if resize_images:
+    	img = cv.resize(img, (0,0), fx=0.3, fy=0.3) 
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
     # Find the chess board corners
@@ -67,7 +73,8 @@ ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.sha
 print('Undistorting the photos...')
 for fname in images:
     img = cv.imread(fname)
-    img = cv.resize(img, (0,0), fx=0.3, fy=0.3) 
+    if resize_images:
+    	img = cv.resize(img, (0,0), fx=0.3, fy=0.3) 
     h, w = img.shape[:2]
     newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (w,h), 1, (w,h))
 
