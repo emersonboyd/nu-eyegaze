@@ -9,8 +9,10 @@ import util
 
 # resize_images = True
 # input_path = 'iphone_6_plus_emerson_calib/*.JPG'
+# resize_images = False
+# input_path = 'picam_calib_twisttie/*.jpg'
 resize_images = False
-input_path = 'picam_calib_twisttie/*.jpg'
+input_path = 'picam_no_twisttie_calib/*.jpg'
 
 # these numbers indicated the number of interior corners
 num_rows = 8
