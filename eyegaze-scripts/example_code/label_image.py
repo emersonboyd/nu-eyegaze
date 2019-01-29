@@ -21,6 +21,7 @@ import argparse
 
 import numpy as np
 import tensorflow as tf
+from os.path import exists
 from google.protobuf import text_format
 from tensorflow.python.platform import gfile
 
@@ -76,15 +77,14 @@ def load_labels(label_file):
 
 if __name__ == "__main__":
   file_name = "tensorflow/examples/label_image/data/grace_hopper.jpg"
-  model_file = \
-    "tensorflow/examples/label_image/data/inception_v3_2016_08_28_frozen.pb"
-  label_file = "tensorflow/examples/label_image/data/imagenet_slim_labels.txt"
+  model_file = 'model/output_graph.pb'
+  label_file = 'model/output_labels.txt'
   input_height = 299
   input_width = 299
   input_mean = 0
   input_std = 255
-  input_layer = "input"
-  output_layer = "InceptionV3/Predictions/Reshape_1"
+  input_layer = 'Placeholder'
+  output_layer = 'final_result'
 
   parser = argparse.ArgumentParser()
   parser.add_argument("--image", help="image to be processed")
