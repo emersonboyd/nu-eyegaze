@@ -13,6 +13,7 @@ import util
 # input_path = 'picam_calib_twisttie/*.jpg'
 resize_images = False
 input_path = 'picam_no_twisttie_calib/*.jpg'
+test_path = 'picam_no_twisttie_calib_test/*.jpg'
 
 # these numbers indicated the number of interior corners
 num_rows = 8
@@ -28,13 +29,15 @@ objp[:,:2] = np.mgrid[0:num_rows, 0:num_cols].T.reshape(-1,2)
 # Arrays to store object points and image points from all the images.
 objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
-images = glob.glob('{}/{}'.format(util.get_resources_directory(), input_path))
+input_images = glob.glob('{}/{}'.format(util.get_resources_directory(), input_path))
 
+
+test_images = glob.glob('{}/{}'.format(util.get_resources_directory(), test_path))
 
 
 
 print('Finding corners in image dataset...')
-for fname in images:
+for fname in input_images:
     img = cv.imread(fname)
     if resize_images:
     	img = cv.resize(img, (0,0), fx=0.3, fy=0.3) 
@@ -73,7 +76,7 @@ ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.sha
 
 
 print('Undistorting the photos...')
-for fname in images:
+for fname in test_images:
     img = cv.imread(fname)
     if resize_images:
     	img = cv.resize(img, (0,0), fx=0.3, fy=0.3) 
@@ -108,3 +111,14 @@ print( "total error: {}".format(mean_error/len(objpoints)) )
 
 
 print ('Done...')
+
+print('ret')
+print(ret)
+print('mtx')
+print(mtx)
+print('dist')
+print(dist)
+print('rvecs')
+print(rvecs)
+print('tvecs')
+print(tvecs)
