@@ -7,13 +7,14 @@ import util
 # following this tutorial:
 # https://docs.opencv.org/4.0.0/dc/dbb/tutorial_py_calibration.html
 
-# resize_images = True
-# input_path = 'iphone_6_plus_emerson_calib/*.JPG'
+resize_images = True
+input_path = 'iphone_6_plus_emerson_calib/*.JPG'
+test_path = 'iphone_6_plus_emerson_calib_test/*.JPG'
 # resize_images = False
 # input_path = 'picam_calib_twisttie/*.jpg'
-resize_images = False
-input_path = 'picam_no_twisttie_calib/*.jpg'
-test_path = 'picam_no_twisttie_calib_test/*.jpg'
+# resize_images = False
+# input_path = 'picam_no_twisttie_calib/*.jpg'
+# test_path = 'picam_no_twisttie_calib_test/*.jpg'
 
 # these numbers indicated the number of interior corners
 num_rows = 8
