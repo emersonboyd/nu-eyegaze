@@ -95,4 +95,70 @@ img3 = cv.drawMatchesKnn(imgL,kp1,imgR,kp2,good,outImg=None,flags=2)
 
 
 
+
+
+#
+# METHOD 3: Brute-force matching with SIFT descriptors then Ransac
+#
+
+MIN_MATCH_COUNT = 10
+
+# Initiate SIFT detector
+sift = cv.xfeatures2d.SIFT_create()
+
+# find the keypoints and descriptors with SIFT
+kp1, des1 = sift.detectAndCompute(imgL,None)
+kp2, des2 = sift.detectAndCompute(imgR,None)
+
+FLANN_INDEX_KDTREE = 0
+index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
+search_params = dict(checks = 50)
+
+flann = cv.FlannBasedMatcher(index_params, search_params)
+
+matches = flann.knnMatch(des1,des2,k=2)
+
+# store all the good matches as per Lowe's ratio test.
+good = []
+for m,n in matches:
+    if m.distance < 0.7*n.distance:
+        good.append(m)
+
+
+if len(good)>MIN_MATCH_COUNT:
+    src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
+    dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
+
+    threshold = 5.0
+    M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, threshold)
+    matchesMask = mask.ravel().tolist()
+
+    h,w = imgL.shape
+    pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
+    dst = cv.perspectiveTransform(pts,M)
+
+    imgR = cv.polylines(imgR,[np.int32(dst)],True,255,3, cv.LINE_AA)
+
+else:
+    print("Not enough matches are found - {}/{}".format(len(good), MIN_MATCH_COUNT))
+    matchesMask = None
+    exit(1)
+
+
+draw_params = dict(matchColor = (0,255,0), # draw matches in green color
+                   singlePointColor = None,
+                   matchesMask = matchesMask, # draw only inliers
+                   flags = 2)
+
+img3 = cv.drawMatches(imgL,kp1, imgR, kp2, good, None, **draw_params)
+plt.imshow(img3, 'gray'),plt.show()
+
+for i in range(len(matchesMask)):
+    if matchesMask[i] == 1:
+        print(i)
+        print('{} in kp1 matches with {} in kp2'.format(good[i].queryIdx, good[i].trainIdx))
+        kpL = kp1[good[i].queryIdx]
+        kpR = kp2[good[i].trainIdx]
+        print('x diff between kp1 and kp2: {}, y diff between kp1 and kp2: {}', kpR.pt[0] - kpL.pt[0], kpR.pt[1] - kpL.pt[1])
+
 print('execution seconds:', time.time() - start_time)
