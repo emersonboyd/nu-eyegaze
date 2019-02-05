@@ -7,7 +7,7 @@ import util
 # following this tutorial:
 # https://docs.opencv.org/4.0.0/dc/dbb/tutorial_py_calibration.html
 
-resize_images = True
+resize_images = False
 input_path = 'iphone_6_plus_emerson_calib/*.JPG'
 test_path = 'iphone_6_plus_emerson_calib_test/*.JPG'
 # resize_images = False
@@ -39,6 +39,7 @@ test_images = glob.glob('{}/{}'.format(util.get_resources_directory(), test_path
 
 print('Finding corners in image dataset...')
 for fname in input_images:
+    print(fname)
     img = cv.imread(fname)
     if resize_images:
     	img = cv.resize(img, (0,0), fx=0.3, fy=0.3) 
@@ -106,7 +107,7 @@ for i in range(len(objpoints)):
     imgpoints2, _ = cv.projectPoints(objpoints[i], rvecs[i], tvecs[i], mtx, dist)
     error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2)/len(imgpoints2)
     mean_error += error
-print( "total error: {}".format(mean_error/len(objpoints)) )
+print("total error: {}".format(mean_error/len(objpoints)))
 
 
 

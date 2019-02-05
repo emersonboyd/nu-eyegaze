@@ -13,10 +13,10 @@ start_time = time.time()
 image_path = 'depth_photos/cones'
 image_path = 'depth_photos/tsukuba'
 image_path = 'stereo_photos'
-imgL = cv.imread('{}/{}/imgL_undist.png'.format(util.get_resources_directory(), image_path))
+imgL = cv.imread('{}/{}/imgL_undist2.png'.format(util.get_resources_directory(), image_path))
 imgL = cv.cvtColor(imgL, cv.COLOR_BGR2GRAY)
 # imgL = cv.rotate(imgL, cv.ROTATE_90_CLOCKWISE)
-imgR = cv.imread('{}/{}/imgR_undist.png'.format(util.get_resources_directory(), image_path))
+imgR = cv.imread('{}/{}/imgR_undist2.png'.format(util.get_resources_directory(), image_path))
 imgR = cv.cvtColor(imgR, cv.COLOR_BGR2GRAY)
 # imgR = cv.rotate(imgR, cv.ROTATE_90_CLOCKWISE)
 
@@ -155,10 +155,16 @@ plt.imshow(img3, 'gray'),plt.show()
 
 for i in range(len(matchesMask)):
     if matchesMask[i] == 1:
-        print(i)
         print('{} in kp1 matches with {} in kp2'.format(good[i].queryIdx, good[i].trainIdx))
         kpL = kp1[good[i].queryIdx]
         kpR = kp2[good[i].trainIdx]
-        print('x diff between kp1 and kp2: {}, y diff between kp1 and kp2: {}', kpR.pt[0] - kpL.pt[0], kpR.pt[1] - kpL.pt[1])
+        print('x diff between kp1 and kp2: {}, y diff between kp1 and kp2: {}', kpL.pt[0] - kpR.pt[0], kpL.pt[1] - kpR.pt[1])
+        x_disparity_pixel =  kpL.pt[0] - kpR.pt[0]
+        micrometer_per_pixel = 1.5
+        focal_length_millimeter = 4.15
+        focal_length_pixel = focal_length_millimeter / (micrometer_per_pixel / 1000)
+        baseline_millimeter = 86.9
+        estimated_depth_millimeter = baseline_millimeter * focal_length_pixel / x_disparity_pixel
+        print('estimated depth {} {}'.format(focal_length_pixel, estimated_depth_millimeter))
 
 print('execution seconds:', time.time() - start_time)
