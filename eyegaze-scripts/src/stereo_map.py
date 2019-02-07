@@ -124,12 +124,15 @@ for m,n in matches:
     if m.distance < 0.7*n.distance:
         good.append(m)
 
+# show the matches before ransac filtering
+# img3 = cv.drawMatches(imgL, kp1, imgR, kp2, good, outImg=None, flags=2)
+# plt.imshow(img3, 'gray'), plt.show()
 
 if len(good)>MIN_MATCH_COUNT:
     src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
     dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
 
-    threshold = 5.0
+    threshold = 20.0
     M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, threshold)
     matchesMask = mask.ravel().tolist()
 
@@ -150,8 +153,10 @@ draw_params = dict(matchColor = (0,255,0), # draw matches in green color
                    matchesMask = matchesMask, # draw only inliers
                    flags = 2)
 
-img3 = cv.drawMatches(imgL,kp1, imgR, kp2, good, None, **draw_params)
-plt.imshow(img3, 'gray'),plt.show()
+print(M)
+
+# img3 = cv.drawMatches(imgL, kp1, imgR, kp2, good, None, **draw_params)
+# plt.imshow(img3, 'gray'), plt.show()
 
 for i in range(len(matchesMask)):
     if matchesMask[i] == 1:
@@ -165,6 +170,17 @@ for i in range(len(matchesMask)):
         focal_length_pixel = focal_length_millimeter / (micrometer_per_pixel / 1000)
         baseline_millimeter = 86.9
         estimated_depth_millimeter = baseline_millimeter * focal_length_pixel / x_disparity_pixel
-        print('estimated depth {} {}'.format(focal_length_pixel, estimated_depth_millimeter))
+        print('estimated depth {}'.format(estimated_depth_millimeter))
+
+        # attempt to transform one point to the next
+        xL = kpL.pt[0]
+        yL = kpL.pt[1]
+        pL = np.array([xL, yL, 1])
+        pR = np.matmul(M, pL)
+        print('old x and y: ({}, {})'.format(xL, yL))
+        print('new x and y: ({}, {})'.format(pR[0], pR[1]))
+        print('actual x and y: ({}, {})'.format(kpR.pt[0], kpR.pt[1]))
+
 
 print('execution seconds:', time.time() - start_time)
+
