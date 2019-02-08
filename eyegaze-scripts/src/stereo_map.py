@@ -15,10 +15,8 @@ image_path = 'depth_photos/tsukuba'
 image_path = 'stereo_photos'
 imgL = cv.imread('{}/{}/imgL_undist2.png'.format(util.get_resources_directory(), image_path))
 imgL = cv.cvtColor(imgL, cv.COLOR_BGR2GRAY)
-# imgL = cv.rotate(imgL, cv.ROTATE_90_CLOCKWISE)
 imgR = cv.imread('{}/{}/imgR_undist2.png'.format(util.get_resources_directory(), image_path))
 imgR = cv.cvtColor(imgR, cv.COLOR_BGR2GRAY)
-# imgR = cv.rotate(imgR, cv.ROTATE_90_CLOCKWISE)
 
 # stereo = cv.StereoBM_create(numDisparities=16, blockSize=15)
 # disparity = stereo.compute(imgL, imgR)
@@ -42,69 +40,13 @@ imgR = cv.cvtColor(imgR, cv.COLOR_BGR2GRAY)
 
 
 #
-# METHOD 1: Brute-force matching with ORB descriptors
-#
-
-# Initiate ORB detector
-orb = cv.ORB_create()
-# find the keypoints and descriptors with ORB
-kp1, des1 = orb.detectAndCompute(imgL,None)
-kp2, des2 = orb.detectAndCompute(imgR,None)
-
-# create BFMatcher object
-bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=True)
-# Match descriptors.
-matches = bf.match(des1, des2)
-# Sort them in the order of their distance.
-matches = sorted(matches, key = lambda x:x.distance)
-# Draw first 10 matches.
-img3 = cv.drawMatches(imgL, kp1, imgR, kp2, matches[:100], outImg=None, flags=2)
-# plt.imshow(img3),plt.show()
-
-
-
-
-
-
-
-#
-# METHOD 2: Brute-force matching with SIFT descriptors
-#
-
-# Initiate SIFT detector
-sift = cv.xfeatures2d.SIFT_create()
-# find the keypoints and descriptors with SIFT
-kp1, des1 = sift.detectAndCompute(imgL,None)
-kp2, des2 = sift.detectAndCompute(imgR,None)
-# BFMatcher with default params
-bf = cv.BFMatcher()
-matches = bf.knnMatch(des1,des2, k=2)
-# Apply ratio test
-good = []
-for m,n in matches:
-    if m.distance < 0.75*n.distance:
-        good.append([m])
-# cv.drawMatchesKnn expects list of lists as matches.
-img3 = cv.drawMatchesKnn(imgL,kp1,imgR,kp2,good,outImg=None,flags=2)
-# plt.imshow(img3),plt.show()
-
-
-
-
-
-
-
-
-
-
-#
 # METHOD 3: Brute-force matching with SIFT descriptors then Ransac
 #
 
 MIN_MATCH_COUNT = 10
 
 # Initiate SIFT detector
-sift = cv.xfeatures2d.SIFT_create()
+sift = cv.xfeatures2d.SIFT_create()  # need open-cv 3.4.2.17
 
 # find the keypoints and descriptors with SIFT
 kp1, des1 = sift.detectAndCompute(imgL,None)
@@ -132,7 +74,7 @@ if len(good)>MIN_MATCH_COUNT:
     src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
     dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
 
-    threshold = 20.0
+    threshold = 20.0  # TODO perfect this number for the RPi
     M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, threshold)
     matchesMask = mask.ravel().tolist()
 
