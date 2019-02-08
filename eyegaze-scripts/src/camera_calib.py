@@ -2,6 +2,8 @@ import numpy as np
 import cv2 as cv
 import glob
 import pickle
+from constants import CameraType
+import image_helper
 
 import util
 
@@ -30,8 +32,6 @@ def calculateCameraCalibrationData(input_path):
     for fname in input_images:
         print(fname)
         img = cv.imread(fname)
-        if resize_images:
-            img = cv.resize(img, (0, 0), fx=0.3, fy=0.3)
         gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
         # Find the chess board corners
@@ -61,18 +61,24 @@ def calculateCameraCalibrationData(input_path):
     return cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
 
-if __name__ == '__main__':
-    resize_images = False
-    input_path = 'iphone_6_plus_emerson_calib/*.JPG'
-    test_path = 'iphone_6_plus_emerson_calib_test/*.JPG'
-    calibration_data_path = 'iphone_6_plus_emerson.pickle'
-    # resize_images = False
-    # input_path = 'picam_twisttie_calib/*.jpg'
-    # resize_images = False
-    # calibration_data_path = 'picam_right.pickle'
-    # input_path = 'picam_no_twisttie_calib/*.jpg'
-    # test_path = 'picam_no_twisttie_calib_test/*.jpg'
-    # calibration_data_path = 'picam_left.pickle'
+def run():
+    camera_type = CameraType.EMERSON_IPHONE_6_PLUS
+
+    if camera_type == CameraType.EMERSON_IPHONE_6_PLUS:
+        input_path = 'iphone_6_plus_emerson_calib/*.JPG'
+        test_path = 'iphone_6_plus_emerson_calib_test/*.JPG'
+        calibration_data_path = 'iphone_6_plus_emerson.pickle'
+    elif camera_type == CameraType.PICAM_RIGHT:
+        input_path = 'picam_right_calib/*.jpg'
+        test_path = 'picam_right_calib_test/*.jpg'
+        calibration_data_path = 'picam_right.pickle'
+    elif camera_type == CameraType.PICAM_LEFT:
+        input_path = 'picam_left_calib/*.jpg'
+        test_path = 'picam_left_calib_test/*.jpg'
+        calibration_data_path = 'picam_left.pickle'
+    else:
+        print('Invalid camera type')
+        exit(1)
 
     full_calibration_data_path = '{}/{}'.format(util.get_resources_directory(), calibration_data_path)
     if not util.file_exists(full_calibration_data_path):
@@ -85,30 +91,13 @@ if __name__ == '__main__':
 
     test_images = glob.glob('{}/{}'.format(util.get_resources_directory(), test_path))
 
-
-
     print('Undistorting the photos...')
     for fname in test_images:
         img = cv.imread(fname)
-        if resize_images:
-            img = cv.resize(img, (0,0), fx=0.3, fy=0.3)
-        h, w = img.shape[:2]
-        newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (w,h), 1, (w,h))
+        dst = image_helper.undistort(img, mtx, dist)
 
-        # check for errors
-        if roi[0] == 0 and roi[1] == 0 and roi[2] == 0 and roi[3] == 0:
-            print('Failed to get valid roi for', fname)
-            exit(1)
-
-        # undistort
-        dst = cv.undistort(img, mtx, dist, None, newcameramtx)
-
-        # crop the image based on valid pixels calculated from getOptimalNewCameraMatrix()
-        x, y, w, h = roi
-        dst = dst[y:y+h, x:x+w]
-        cv.imwrite('{}/calibresult_{}.png'.format(util.get_output_directory(), fname.split('/')[-1]), dst)
-
-
+        output_image_path = '{}/calibresult_{}.png'.format(util.get_output_directory(), fname.split('/')[-1])
+        cv.imwrite(output_image_path, dst)
 
 
     # print('Calculating reprojection error...')
@@ -119,18 +108,8 @@ if __name__ == '__main__':
     #     mean_error += error
     # print("total error: {}".format(mean_error/len(objpoints)))
 
+    print('Done...')
 
 
-
-    print ('Done...')
-
-    print('ret')
-    print(ret)
-    print('mtx')
-    print(mtx)
-    print('dist')
-    print(dist)
-    print('rvecs')
-    print(rvecs)
-    print('tvecs')
-    print(tvecs)
+if __name__ == '__main__':
+    run()
