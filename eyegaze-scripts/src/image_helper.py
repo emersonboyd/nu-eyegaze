@@ -1,9 +1,31 @@
 import cv2 as cv
+import pickle
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
+
 import util
 from constants import CameraType
 
 
 IMAGE_HELPER_MIN_MATCH_COUNT = 10
+
+
+def get_calib_data_for_camera_type(camera_type):
+    res_path = util.get_resources_directory()
+
+    if camera_type == CameraType.EMERSON_IPHONE_6_PLUS:
+        calib_data_path = '{}/iphone_6_plus_emerson.pickle'.format(res_path)
+    else:
+        print('Invalid camera type entered.')
+        exit(1)
+
+
+    with open(calib_data_path, 'rb') as calib_data_file:
+        ret, mtx, dist, rvecs, tvecs = pickle.load(calib_data_file)
+
+    return mtx, dist
 
 
 def undistort(input_image, mtx, dist):
@@ -48,22 +70,22 @@ def get_homography_matrix(image_left, image_right):
             good.append(m)
 
     # show the matches before ransac filtering
-    # img3 = cv.drawMatches(imgL, kp1, imgR, kp2, good, outImg=None, flags=2)
+    # img3 = cv.drawMatches(image_left, kp1, image_right, kp2, good, outImg=None, flags=2)
     # plt.imshow(img3, 'gray'), plt.show()
 
     if len(good) > IMAGE_HELPER_MIN_MATCH_COUNT:
         src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
-        threshold = 20.0  # TODO perfect this number for the RPi
+        threshold = 10.0  # TODO perfect this number for the RPi
         M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, threshold)
         matchesMask = mask.ravel().tolist()
 
-        h, w = imgL.shape
+        h, w = image_left.shape
         pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
         dst = cv.perspectiveTransform(pts, M)
 
-        imgR = cv.polylines(imgR, [np.int32(dst)], True, 255, 3, cv.LINE_AA)
+        image_right = cv.polylines(image_right, [np.int32(dst)], True, 255, 3, cv.LINE_AA)
 
     else:
         print("Not enough matches are found - {}/{}".format(len(good), IMAGE_HELPER_MIN_MATCH_COUNT))
@@ -74,13 +96,23 @@ def get_homography_matrix(image_left, image_right):
     #                    singlePointColor=None,
     #                    matchesMask=matchesMask,  # draw only inliers
     #                    flags=2)
-    # img3 = cv.drawMatches(imgL, kp1, imgR, kp2, good, None, **draw_params)
+    # img3 = cv.drawMatches(image_left, kp1, image_right, kp2, good, None, **draw_params)
     # plt.imshow(img3, 'gray'), plt.show()
 
     return M
 
 
-# calculates the depth of the object given based on the two pixel locations
+# determines the corresponding pixel in the right image based off the homography matrix
+def calculate_corresponding_pixel_right(pixel_left, M):
+    x_left, y_left = pixel_left
+
+    estimated_pixel_right = np.matmul(M, np.array([x_left, y_left, 1]))[:2]
+    print(estimated_pixel_right)
+
+    return estimated_pixel_right
+
+
+# calculates the depth of the location given in millimeters based on the pixels in two photos
 def calculate_depth(pixel_left, pixel_right, camera_type):
     x_left, y_left = pixel_left
     x_right, y_right = pixel_right
@@ -94,4 +126,26 @@ def calculate_depth(pixel_left, pixel_right, camera_type):
         print('Invalid camera type entered')
         exit(1)
 
-    return depth
+    # TODO consider using both x disparity and y disparity combined
+    x_disparity_pixel = x_left - x_right
+    estimated_depth_millimeter = baseline_millimeter * focal_length_pixel / x_disparity_pixel
+
+    return estimated_depth_millimeter / 1000
+
+
+def show_image_with_mark(image, pixel):
+    x, y = pixel
+
+    # Create a figure. Equal aspect so circles look circular
+    fig, ax = plt.subplots(1)
+    ax.set_aspect('equal')
+
+    # Show the image
+    ax.imshow(image, cmap=mpl.cm.gray)
+
+    # Now, loop through coord arrays, and create a circle at each x,y pair
+    circ = Circle((x, y), 25)
+    ax.add_patch(circ)
+
+    # Show the image
+    plt.show()
