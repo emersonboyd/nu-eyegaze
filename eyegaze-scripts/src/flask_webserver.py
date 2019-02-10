@@ -13,3 +13,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 @cross_origin()
 def print_hello():
     return 'hello'
+
+if __name__ == '__main__':
+    print("Starting Webserver")
+    app.run(host="0.0.0.0", port=5000, debug=True)
