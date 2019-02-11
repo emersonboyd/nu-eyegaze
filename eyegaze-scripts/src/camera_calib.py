@@ -62,7 +62,7 @@ def calculateCameraCalibrationData(input_path):
 
 
 def run():
-    camera_type = CameraType.PICAM_RIGHT
+    camera_type = CameraType.PICAM_LEFT
 
     if camera_type == CameraType.EMERSON_IPHONE_6_PLUS:
         input_path = 'iphone_6_plus_emerson_calib/*.JPG'
@@ -74,7 +74,7 @@ def run():
         calibration_data_path = 'picam_right.pickle'
     elif camera_type == CameraType.PICAM_LEFT:
         input_path = 'picam_left_calib/*.jpg'
-        test_path = 'picam_left_calib_test/*.jpg'
+        test_path = 'picam_left_calib/*.jpg'
         calibration_data_path = 'picam_left.pickle'
     else:
         print('Invalid camera type')
