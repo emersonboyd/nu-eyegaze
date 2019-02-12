@@ -75,8 +75,8 @@ def load_labels(label_file):
   return label
 
 
-if __name__ == "__main__":
-  file_name = "tensorflow/examples/label_image/data/grace_hopper.jpg"
+def label_image(file_name):
+  # file_name = "tensorflow/examples/label_image/data/grace_hopper.jpg"
   model_file = 'model/output_graph.pb'
   label_file = 'model/output_labels.txt'
   input_height = 299
