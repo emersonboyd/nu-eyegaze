@@ -140,3 +140,5 @@ def label_image(file_name):
   labels = load_labels(label_file)
   for i in top_k:
     print(labels[i], results[i])
+
+  return str(labels[0]) + ' ' + str(results[0]) + ' ' + str(labels[1]) + ' ' + str(results[1])

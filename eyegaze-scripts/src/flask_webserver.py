@@ -9,6 +9,7 @@ import sys
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+app.config['UPLOAD_FOLDER'] = ''
 
 @app.route('/hello', methods=["POST"])
 @cross_origin()
@@ -18,7 +19,8 @@ def print_hello():
 @app.route('/inf', methods=["POST"])
 @cross_origin()
 def run_model():
-
+    file = request.files['media']
+    file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'image.jpg'))
     labels = label_image(request.files)
     return labels
 
