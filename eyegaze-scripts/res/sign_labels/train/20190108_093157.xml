@@ -1,0 +1,26 @@
+<annotation>
+	<folder>sign_photos</folder>
+	<filename>20190108_093157.jpg</filename>
+	<path>/home/emersonboyd/git_repo/nu-eyegaze/eyegaze-scripts/res/sign_photos/20190108_093157.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>4032</width>
+		<height>3024</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>exit sign</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1175</xmin>
+			<ymin>1186</ymin>
+			<xmax>1956</xmax>
+			<ymax>2438</ymax>
+		</bndbox>
+	</object>
+</annotation>

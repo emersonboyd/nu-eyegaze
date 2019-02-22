@@ -1,0 +1,26 @@
+<annotation>
+	<folder>bathroom_sign</folder>
+	<filename>IMG_5599.JPG</filename>
+	<path>/home/emersonboyd/git_repo/nu-eyegaze/eyegaze-scripts/res/sign_photos/bathroom_sign/IMG_5599.JPG</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>3264</width>
+		<height>2448</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>bathroom sign</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1510</xmin>
+			<ymin>487</ymin>
+			<xmax>2091</xmax>
+			<ymax>834</ymax>
+		</bndbox>
+	</object>
+</annotation>
