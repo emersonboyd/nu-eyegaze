@@ -1,4 +1,4 @@
-*/.idea/*
-*/out/*
+.idea/
+out/
 __pycache__
-*/MNIST_data/*
+ssd_mobilenet_*/
