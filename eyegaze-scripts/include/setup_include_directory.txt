@@ -1,0 +1,9 @@
+run the command in the include directory: git clone https://github.com/tensorflow/models.git
+
+run the command in the "include/models/research" directory: protoc object_detection/protos/*.proto --python_out=.
+
+add the "{}/nu-eyegaze/eyegaze-scripts/include/models/research" and "{}/nu-eyegaze/eyegaze-scripts/include/models/research/slim" to your PYTHONPATH in the ~/.bashrc
+
+run the command in the "include/models/research" directory: sudo bash
+run the command in the "include/models/research" directory in your new sudo shell: source ~/.bashrc
+run the command in the "include/models/research" directory in your new sudo shell: python3 setup.py install

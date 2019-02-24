@@ -24,7 +24,7 @@ def class_text_to_int(row_label):
     if row_label == 'bathroom sign':
         return 2
     else:
-        None
+        raise ValueError('Invalid class provided {}.'.format(row_label))
 
 def split(df, group):
     data = namedtuple('data', ['filename', 'object'])
