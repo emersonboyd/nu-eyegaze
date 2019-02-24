@@ -32,8 +32,10 @@ while True:
         # sleep(0.75) allow time to adjust to light levels
         # camera.capture('image' + str(datetime.datetime.now()) + '.jpg')
         test_ivport_quad.picam_capture()
-        send_image("image1_CAM1.jpg")
-        send_image("image2_CAM2.jpg")
+        labels1 = send_image("image1_CAM1.jpg")
+        print(labels1)
+        labels2 = send_image("image2_CAM2.jpg")
+        print(labels2)
 
 #camera.stop_preview()
 

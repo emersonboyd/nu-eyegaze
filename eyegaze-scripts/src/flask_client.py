@@ -16,4 +16,4 @@ def send_image(image_name, ip="35.185.63.125", port="5000", command="inf"):
     files = {'media': img}
     request = requests.post(post_command, files=files)
     time.sleep(.1)
-    print(request.text)
+    return request.text
