@@ -1,0 +1,9 @@
+item {
+  id: 1
+  name: 'exit sign'
+}
+
+item {
+  id: 2
+  name: 'bathroom sign'
+}
