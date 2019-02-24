@@ -1,4 +1,9 @@
 .idea/
 out/
 __pycache__
-ssd_mobilenet_*/
+ssd_mobilenet_v1_coco_11_06_2017/
+train.record
+test.record
+*/include/models/
+*/res/sign_training/
+
