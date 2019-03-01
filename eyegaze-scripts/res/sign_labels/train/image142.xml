@@ -1,0 +1,38 @@
+<annotation>
+	<folder>train</folder>
+	<filename>image142.jpg</filename>
+	<path>/home/emersonboyd/git_repo/nu-eyegaze/eyegaze-scripts/res/sign_photos/train/image142.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>1858</width>
+		<height>1040</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>bathroom sign</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>579</xmin>
+			<ymin>495</ymin>
+			<xmax>592</xmax>
+			<ymax>558</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>bathroom sign</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>243</xmin>
+			<ymin>497</ymin>
+			<xmax>289</xmax>
+			<ymax>629</ymax>
+		</bndbox>
+	</object>
+</annotation>

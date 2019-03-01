@@ -17,6 +17,10 @@ def get_calib_data_for_camera_type(camera_type):
 
     if camera_type == CameraType.EMERSON_IPHONE_6_PLUS:
         calib_data_path = '{}/iphone_6_plus_emerson.pickle'.format(res_path)
+    if camera_type == CameraType.PICAM_LEFT:
+        calib_data_path = '{}/picam_left.pickle'.format(res_path)
+    if camera_type == CameraType.PICAM_RIGHT:
+        calib_data_path = '{}/picam_right.pickle'.format(res_path)
     else:
         print('Invalid camera type entered.')
         exit(1)

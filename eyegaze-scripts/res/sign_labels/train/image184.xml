@@ -1,0 +1,26 @@
+<annotation>
+	<folder>train</folder>
+	<filename>image184.jpg</filename>
+	<path>/home/emersonboyd/git_repo/nu-eyegaze/eyegaze-scripts/res/sign_photos/train/image184.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>1858</width>
+		<height>1040</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>exit sign</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1080</xmin>
+			<ymin>341</ymin>
+			<xmax>1115</xmax>
+			<ymax>369</ymax>
+		</bndbox>
+	</object>
+</annotation>
