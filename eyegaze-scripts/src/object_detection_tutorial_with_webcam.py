@@ -65,8 +65,9 @@ from include.models.research.object_detection.utils import visualization_utils a
 
 
 # What model to download.
-MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
+MODEL_NAME = 'rfcn_resnet101_coco_2018_01_28'
 MODEL_FILE = MODEL_NAME + '.tar.gz'
+MODEL_FILE_PATH = '{}/{}'.format(util.get_object_detection_directory(), MODEL_FILE)
 DOWNLOAD_BASE = 'http://download.tensorflow.org/models/object_detection/'
 
 PATH_TO_OBJECT_DETECTION = util.get_object_detection_directory()
@@ -83,13 +84,13 @@ PATH_TO_LABELS = os.path.join(PATH_TO_OBJECT_DETECTION, 'data', 'mscoco_label_ma
 # In[16]:
 
 
-opener = urllib.request.URLopener()
-opener.retrieve(DOWNLOAD_BASE + MODEL_FILE, MODEL_FILE)
-tar_file = tarfile.open(MODEL_FILE)
-for file in tar_file.getmembers():
-  file_name = os.path.basename(file.name)
-  if 'frozen_inference_graph.pb' in file_name:
-    tar_file.extract(file, os.getcwd())
+# opener = urllib.request.URLopener()
+# opener.retrieve(DOWNLOAD_BASE + MODEL_FILE, MODEL_FILE_PATH)
+# tar_file = tarfile.open(MODEL_FILE_PATH)
+# for file in tar_file.getmembers():
+#   file_name = os.path.basename(file.name)
+#   if 'frozen_inference_graph.pb' in file_name:
+#     tar_file.extract(file, util.get_object_detection_directory())
 
 
 # ## Load a (frozen) Tensorflow model into memory.
