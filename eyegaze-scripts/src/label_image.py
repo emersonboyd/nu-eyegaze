@@ -77,8 +77,8 @@ def load_labels(label_file):
 
 def label_image(file_name):
   # file_name = "tensorflow/examples/label_image/data/grace_hopper.jpg"
-  model_file = 'model/output_graph.pb'
-  label_file = 'model/output_labels.txt'
+  model_file = '../model/output_graph.pb'
+  label_file = '../model/output_labels.txt'
   input_height = 299
   input_width = 299
   input_mean = 0
@@ -141,4 +141,9 @@ def label_image(file_name):
   for i in top_k:
     print(labels[i], results[i])
 
-  return str(labels[0]) + ' ' + str(results[0]) + ' ' + str(labels[1]) + ' ' + str(results[1])
+  return_string = ""
+  for label, result in zip(labels, results):
+    return_string = return_string + label + " "
+    return_string = return_string + result + " "
+
+  return return_string

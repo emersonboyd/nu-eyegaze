@@ -25,7 +25,6 @@ def get_object_detection_directory():
 	return '{}/../include/models/research/object_detection'.format(this_directory)
 
 
-
 def pixel_in_bounds(image, pixel):
 	x, y = pixel
 	image_height, image_width = image.shape
