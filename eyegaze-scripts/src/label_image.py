@@ -45,6 +45,8 @@ def read_tensor_from_image_file(file_name,
                                 input_std=255):
   input_name = "file_reader"
   output_name = "normalized"
+  print(file_name)
+  print(input_name)
   file_reader = tf.read_file(file_name, input_name)
   if file_name.endswith(".png"):
     image_reader = tf.image.decode_png(
@@ -143,7 +145,7 @@ def label_image(file_name):
 
   return_string = ""
   for label, result in zip(labels, results):
-    return_string = return_string + label + " "
-    return_string = return_string + result + " "
+    return_string = return_string + str(label) + " "
+    return_string = return_string + str(result) + " "
 
   return return_string

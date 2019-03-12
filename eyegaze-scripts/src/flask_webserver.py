@@ -22,7 +22,7 @@ def print_hello():
 def run_model():
     file = request.files['media']
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'image.jpg'))
-    labels = label_image(request.files)
+    labels = label_image('image.jpg')
     return labels
 
 
