@@ -1,0 +1,3 @@
+In ../res/neural_net/ download the rfcn_resnet101_coco at https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md
+Unpack the tar.gz file
+
