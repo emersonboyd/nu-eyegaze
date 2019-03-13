@@ -27,6 +27,10 @@ from tensorflow.python.platform import gfile
 import util
 
 from PIL import Image
+import sys
+include_path = '{}'.format(util.get_base_directory())
+print(include_path)
+sys.path.insert(0, include_path)
 from include.models.research.object_detection.utils import label_map_util
 
 import constants
