@@ -1,2 +1,2 @@
-bathroom sign
-exit sign
+bathroom_sign
+exit_sign

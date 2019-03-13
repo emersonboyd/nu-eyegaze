@@ -19,6 +19,7 @@ def print_hello():
 @app.route('/inf', methods=["POST"])
 @cross_origin()
 def run_model():
+
     image_left = request.files['image_left']
     image_left.save(os.path.join(app.config['UPLOAD_FOLDER'], 'image_left.jpg'))
     image_right = request.files['image_right']
