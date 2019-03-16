@@ -85,7 +85,7 @@ def get_homography_matrix(image_left, image_right):
         M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, threshold)
         matchesMask = mask.ravel().tolist()
 
-        h, w = image_left.shape
+        h, w, _ = image_left.shape
         pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
         dst = cv.perspectiveTransform(pts, M)
 
@@ -126,6 +126,11 @@ def calculate_depth(pixel_left, pixel_right, camera_type):
         focal_length_millimeter = 4.15
         focal_length_pixel = focal_length_millimeter / (micrometer_per_pixel / 1000)
         baseline_millimeter = 86.9
+    elif camera_type == CameraType.PICAM_LEFT or camera_type == CameraType.PICAM_RIGHT:
+        micrometer_per_pixel = 1.12
+        focal_length_millimeter = 3.04
+        focal_length_pixel = focal_length_millimeter / (micrometer_per_pixel / 1000)
+        baseline_millimeter = 115.6
     else:
         print('Invalid camera type entered')
         exit(1)

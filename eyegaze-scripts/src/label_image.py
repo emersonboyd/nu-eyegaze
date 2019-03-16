@@ -26,6 +26,11 @@ from google.protobuf import text_format
 from tensorflow.python.platform import gfile
 import util
 
+from BoundingBox import BoundingBox
+from DetectedObject import DetectedObject
+import image_helper
+import cv2 as cv
+
 from PIL import Image
 import sys
 include_path = '{}'.format(util.get_base_directory())
@@ -34,6 +39,8 @@ sys.path.insert(0, include_path)
 from include.models.research.object_detection.utils import label_map_util
 
 import constants
+from constants import CameraType
+
 
 
 
@@ -261,17 +268,61 @@ def get_string_for_classification_dict(d):
   return result_string
 
 
+def get_detection_list_for_classification_dict(classification_dict, image_size):
+  boxes = classification_dict['detection_boxes']
+  scores = classification_dict['detection_scores']
+  classes = classification_dict['detection_classes']
+  detection_list = []
+  for i, box in enumerate(boxes):
+    if scores[i] > MINIMUM_CONFIDENCE:
+      bounding_box = BoundingBox(xmin=box[1]*image_size[0], xmax=box[3]*image_size[0], ymin=box[0]*image_size[1], ymax=box[2]*image_size[1])
+      detection_list.append(DetectedObject(constants.get_class_type_for_number(classes[i]), bounding_box))
+
+  return detection_list
+
+
 def get_response_string_with_image_paths(image1_path, image2_path):
-  image1 = Image.open(image1_path)
-  image2 = Image.open(image2_path)
-  image1_cassification_dict = get_classification_dict_for_image(image1)
-  detection_list = get_detection_list_for_classification_dict(image1_classification_dict)
+  image1 = cv.imread(image1_path)
+  mtx1, dist1 = image_helper.get_calib_data_for_camera_type(constants.CameraType.PICAM_LEFT)
+  image1 = image_helper.undistort(image1, mtx1, dist1)
+  image1_pil = cv.cvtColor(image1, cv.COLOR_BGR2RGB)
+  image1_pil = Image.fromarray(image1_pil.astype('uint8'), 'RGB') # convert the image to a PIL image for tensorflow processing
+
+  image2 = cv.imread(image2_path)
+  mtx2, dist2 = image_helper.get_calib_data_for_camera_type(constants.CameraType.PICAM_RIGHT)
+  image2 = image_helper.undistort(image2, mtx2, dist2)
+  image2_pil = cv.cvtColor(image2, cv.COLOR_BGR2RGB)
+  image2_pil = Image.fromarray(image2_pil.astype('uint8'), 'RGB') # convert the image to a PIL image for tensorflow processing
+
+  image1_classification_dict = get_classification_dict_for_image(image1_pil)
+  detection_list = get_detection_list_for_classification_dict(image1_classification_dict, image1_pil.size)
+
+  # TODO handle case where homograohy matrix doesn't have a point in one or more of the bounding boxes
+  # TODO change all references to image1 to image_left and image2 as image_right
+
+  M = image_helper.get_homography_matrix(image1, image2)
+
+  response_string = ''
+
+  for detection in detection_list:
+    center_x = (detection.bounding_box.xmax + detection.bounding_box.xmin) / 2
+    center_y = (detection.bounding_box.ymax + detection.bounding_box.ymin) / 2
+    pixel_left = (center_x, center_y)
+    est_pixel_right = image_helper.calculate_corresponding_pixel_right(pixel_left, M)
+    if not util.pixel_in_bounds(image2, est_pixel_right):
+      continue
+
+    depth = image_helper.calculate_depth(pixel_left, est_pixel_right, CameraType.PICAM_LEFT)
+
+    response_string += '{} {} 30 '.format(str(detection.class_type), depth)
+
   return response_string
 
 
 def run():
-  image_path = '{}/sign_photos/test/image111.jpg'.format(util.get_resources_directory())
-  print(get_response_string_with_image_paths(image_path, image_path))
+  image_left_path = '/home/emersonboyd/Desktop/PiCam Signs/image12019-02-28 15_31_00.994874_CAM1.jpg'
+  image_right_path = '/home/emersonboyd/Desktop/Right Images/image22019-02-28 15_31_01.744743_CAM2.jpg'
+  print(get_response_string_with_image_paths(image_left_path, image_right_path))
 
 
 if __name__ == '__main__':

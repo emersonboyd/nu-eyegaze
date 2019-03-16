@@ -27,7 +27,7 @@ def get_object_detection_directory():
 
 def pixel_in_bounds(image, pixel):
 	x, y = pixel
-	image_height, image_width = image.shape
+	image_height, image_width, _ = image.shape
 
 	if x < 0 or y < 0:
 		return False

@@ -24,6 +24,12 @@ def get_class_type_for_number(n):
             return c
 
 
+def get_class_type_for_string(s):
+    for c in ClassType:
+        if c.value[0] == s:
+            return c
+
+
 if __name__ == '__main__':
     e = ClassType.EXIT_SIGN
     print(e)
