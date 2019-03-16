@@ -240,8 +240,7 @@ def run_inference_for_single_image(image, graph):
   return output_dict
 
 
-def get_classification_dict_for_image(image_path):
-  image = Image.open(image_path)
+def get_classification_dict_for_image(image):
   image_np = load_image_into_numpy_array(image)
   image_np_expanded = np.expand_dims(image_np, axis=0)
   output_dict = run_inference_for_single_image(image_np, detection_graph)
@@ -250,10 +249,9 @@ def get_classification_dict_for_image(image_path):
 
 
 def get_string_for_classification_dict(d):
-  confidneces = d['detection_scores']
   result_string = ''
 
-  for i, confidnece in enumerate(confidneces):
+  for i, confidnece in enumerate(d['detection_scores']):
     if confidnece < MINIMUM_CONFIDENCE:
       break
 
@@ -263,12 +261,18 @@ def get_string_for_classification_dict(d):
   return result_string
 
 
-def get_response_string_with_image_path(image_path):
-  classification_dict = get_classification_dict_for_image(image_path)
-  response_string = get_string_for_classification_dict(classification_dict)
+def get_response_string_with_image_paths(image1_path, image2_path):
+  image1 = Image.open(image1_path)
+  image2 = Image.open(image2_path)
+  image1_cassification_dict = get_classification_dict_for_image(image1)
+  detection_list = get_detection_list_for_classification_dict(image1_classification_dict)
   return response_string
 
 
-if __name__ == '__main__':
+def run():
   image_path = '{}/sign_photos/test/image111.jpg'.format(util.get_resources_directory())
-  print(get_response_string_with_image_path(image_path))
+  print(get_response_string_with_image_paths(image_path, image_path))
+
+
+if __name__ == '__main__':
+  run()

@@ -25,7 +25,7 @@ def run_model():
     image_right = request.files['image_right']
     image_right.save(os.path.join(app.config['UPLOAD_FOLDER'], 'image_right.jpg'))
     #labels = label_image(request.files)
-    labels = get_response_string_with_image_path('image_left.jpg')
+    labels = get_response_string_with_image_paths('image_left.jpg')
     return labels
 
 
