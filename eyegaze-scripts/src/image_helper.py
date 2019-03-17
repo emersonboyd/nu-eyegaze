@@ -81,7 +81,7 @@ def get_homography_matrix(image_left, image_right):
         src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
-        threshold = 10.0  # TODO perfect this number for the RPi
+        threshold = 4.0  # TODO perfect this number for the RPi
         M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, threshold)
         matchesMask = mask.ravel().tolist()
 
@@ -103,7 +103,7 @@ def get_homography_matrix(image_left, image_right):
     # img3 = cv.drawMatches(image_left, kp1, image_right, kp2, good, None, **draw_params)
     # plt.imshow(img3, 'gray'), plt.show()
 
-    return M
+    return M, kp1, kp2, good, matchesMask
 
 
 # determines the corresponding pixel in the right image based off the homography matrix
@@ -125,18 +125,19 @@ def calculate_depth(pixel_left, pixel_right, camera_type):
         micrometer_per_pixel = 1.5
         focal_length_millimeter = 4.15
         focal_length_pixel = focal_length_millimeter / (micrometer_per_pixel / 1000)
-        baseline_millimeter = 86.9
+        baseline_millimeter = 167
     elif camera_type == CameraType.PICAM_LEFT or camera_type == CameraType.PICAM_RIGHT:
         micrometer_per_pixel = 1.12
         focal_length_millimeter = 3.04
         focal_length_pixel = focal_length_millimeter / (micrometer_per_pixel / 1000)
-        baseline_millimeter = 115.6
+        baseline_millimeter = 102.3
     else:
         print('Invalid camera type entered')
         exit(1)
 
-    # TODO consider using both x disparity and y disparity combined
-    x_disparity_pixel = x_left - x_right
+    # TODO consider NOT using both x disparity and y disparity combined
+    import math
+    x_disparity_pixel = math.sqrt(math.pow(x_left - x_right, 2) + math.pow(abs(y_left - y_right), 2))
     estimated_depth_millimeter = baseline_millimeter * focal_length_pixel / x_disparity_pixel
 
     return estimated_depth_millimeter / 1000

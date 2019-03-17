@@ -40,6 +40,7 @@ from include.models.research.object_detection.utils import label_map_util
 
 import constants
 from constants import CameraType
+from StereoMatch import StereoMatch
 
 
 
@@ -297,31 +298,38 @@ def get_response_string_with_image_paths(image1_path, image2_path):
   image1_classification_dict = get_classification_dict_for_image(image1_pil)
   detection_list = get_detection_list_for_classification_dict(image1_classification_dict, image1_pil.size)
 
-  # TODO handle case where homograohy matrix doesn't have a point in one or more of the bounding boxes
+  # TODO handle case where homograohy matrix doesn't have a point in one or more of the bounding boxes (don't just crash out of nowhere)
   # TODO change all references to image1 to image_left and image2 as image_right
 
-  M = image_helper.get_homography_matrix(image1, image2)
+  _, kpL, kpR, good, matchesMask = image_helper.get_homography_matrix(image1, image2)
+  stereo_matches_list = []
+  for i, match in enumerate(matchesMask):
+    if match:
+      stereo_matches_list.append(StereoMatch(kpL[good[i].queryIdx].pt, kpR[good[i].trainIdx].pt))
 
   response_string = ''
 
   for detection in detection_list:
-    center_x = (detection.bounding_box.xmax + detection.bounding_box.xmin) / 2
-    center_y = (detection.bounding_box.ymax + detection.bounding_box.ymin) / 2
-    pixel_left = (center_x, center_y)
-    est_pixel_right = image_helper.calculate_corresponding_pixel_right(pixel_left, M)
-    if not util.pixel_in_bounds(image2, est_pixel_right):
-      continue
+    found_depth = False
 
-    depth = image_helper.calculate_depth(pixel_left, est_pixel_right, CameraType.PICAM_LEFT)
+    for match in stereo_matches_list:
+      if util.is_in_box(match.left_pixel, detection.bounding_box):
+        depth = image_helper.calculate_depth(match.left_pixel, match.right_pixel, CameraType.PICAM_LEFT)
+        response_string += '{} {} 30 '.format(str(detection.class_type), depth)
+        found_depth = True
+        break
 
-    response_string += '{} {} 30 '.format(str(detection.class_type), depth)
+    if not found_depth:
+      # here is the case where there are no matches detected in the bounding box
+      print('No feature matches located in the bounding box')
+      exit(1)
 
   return response_string
 
 
 def run():
-  image_left_path = '/home/emersonboyd/Desktop/PiCam Signs/image12019-02-28 15_31_00.994874_CAM1.jpg'
-  image_right_path = '/home/emersonboyd/Desktop/Right Images/image22019-02-28 15_31_01.744743_CAM2.jpg'
+  image_left_path = '/home/emersonboyd/Desktop/asdf/left4.jpg'
+  image_right_path = '/home/emersonboyd/Desktop/asdf/right4.jpg'
   print(get_response_string_with_image_paths(image_left_path, image_right_path))
 
 

@@ -39,3 +39,10 @@ def pixel_in_bounds(image, pixel):
 		return False
 
 	return True
+
+
+def is_in_box(pixel, box):
+	x = pixel[0]
+	y = pixel[1]
+
+	return x >= box.xmin and x <= box.xmax and y >= box.ymin and y <= box.ymax
