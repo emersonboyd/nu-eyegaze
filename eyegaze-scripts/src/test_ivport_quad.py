@@ -31,10 +31,10 @@ def picam_capture():
     iv = ivport.IVPort(ivport.TYPE_QUAD2, iv_jumper='A')
     iv.camera_open()
     iv.camera_change(1)
-    iv.camera_capture("image1", use_video_port=False)
+    iv.camera_capture("/home/pi/Pictures/image1" + str(datetime.now()), use_video_port=False)
     print (str(datetime.now()))
     iv.camera_change(2)
-    iv.camera_capture("image2", use_video_port=False)
+    iv.camera_capture("/home/pi/Pictures/image2" + str(datetime.now()), use_video_port=False)
     print (str(datetime.now()))
     iv.close()
 

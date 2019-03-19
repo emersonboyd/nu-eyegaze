@@ -90,9 +90,15 @@ class IVPort():
             if camera == 1:
                 if self.is_camera_v2: self.iviic.write_control_register((0x01))
                 gp.output(self.fPin, False)
+#                print ("self fPin: %d" % self.fPin)
+#                print ("camera is %d" % camera)
+#                print ("v2 = %d" % self.is_camera_v2)
             elif camera == 2:
                 if self.is_camera_v2: self.iviic.write_control_register((0x02))
                 gp.output(self.fPin, True)
+#                print ("self fPin: %d" % self.fPin)
+#                print ("camera is %d" % camera)
+#                print ("v2 = %d" % self.is_camera_v2)
             else:
                 print ("Ivport type is DUAL.")
                 print ("There isnt camera: %d" % camera)
@@ -104,21 +110,49 @@ class IVPort():
                 gp.output(self.ePin, False)
                 gp.output(self.f1Pin, False)
                 gp.output(self.f2Pin, True)
+#                state = gp.input(self.ePin)
+#                if state == 1:
+#                    print("yes")
+#                elif state == 0:
+#                    print("no")
+#                else:
+#                    print("help")
+#                print ("self ePin: %d" % self.ePin)
+#                print ("self f1Pin: %d" % self.f1Pin)
+#                print ("self f2Pin: %d" % self.f2Pin)
+#                print ("camera is %d" % camera)
+#                print ("v2 = %d" % self.is_camera_v2)
             elif camera == 2:
                 if self.is_camera_v2: self.iviic.write_control_register((0x02))
                 gp.output(self.ePin, True)
                 gp.output(self.f1Pin, False)
                 gp.output(self.f2Pin, True)
+#                state2 = gp.input(self.ePin)
+#                if state2 == 1:
+#                    print("yes")
+#                elif state2 == 0:
+#                    print("no")
+#                else:
+#                    print("help")
+#                print ("self ePin: %d" % self.ePin)
+#                print ("self f1Pin: %d" % self.f1Pin)
+#                print ("self f2Pin:%d" % self.f2Pin)
+#                print ("camera is %d" % camera)
+#                print ("v2 = %d" % self.is_camera_v2)
             elif camera == 3:
                 if self.is_camera_v2: self.iviic.write_control_register((0x04))
                 gp.output(self.ePin, False)
                 gp.output(self.f1Pin, True)
                 gp.output(self.f2Pin, False)
+#                print ("camera is %d" % camera)
+#                print ("v2 = %d" % self.is_camera_v2)
             elif camera == 4:
                 if self.is_camera_v2: self.iviic.write_control_register((0x08))
                 gp.output(self.ePin, True)
                 gp.output(self.f1Pin, True)
                 gp.output(self.f2Pin, False)
+#                print ("camera is %d" % camera)
+#                print ("v2 = %d" % self.is_camera_v2)
             else:
                 print ("Ivport type is QUAD.")
                 print ("Cluster feature hasnt been implemented yet.")

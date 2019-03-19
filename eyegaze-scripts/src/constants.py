@@ -29,14 +29,17 @@ class CameraType(Enum):
 
 
 class ClassType(Enum):
-    EXIT_SIGN = 'exit_sign', 1
-    BATHROOM_SIGN = 'bathroom_sign', 2
+    EXIT_SIGN = 'exit_sign', 1, 'exit_sign.mp3'
+    BATHROOM_SIGN = 'bathroom_sign', 2, 'bathroom_sign.mp3'
 
     def __str__(self):
         return self.value[0]
 
     def num(self):
         return self.value[1]
+
+    def get_audio_file_name(self):
+        return self.value[2]
 
 
 def get_class_type_for_number(n):

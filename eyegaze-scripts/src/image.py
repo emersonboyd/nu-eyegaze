@@ -1,22 +1,35 @@
                                                                                                            #!/usr/bin/python3
-
+import os
 from time import sleep
 #import picamera
 #import pygame
-import datetime
+from datetime import datetime as dt
 import RPi.GPIO as GPIO
 import sys
 #sys.path.insert(0, 'home/pi/ivport-v2/')
 import test_ivport_quad
-from flask_client import send_image
+from flask_client import send_images
+#import vlc
+import pygame
+import ivport
 
 def init_button():
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(33, GPIO.IN, pull_up_down = GPIO.PUD_UP) #button to PIN 33/GPIO 13
 
-
 print('Initializing button')
 init_button()
+
+# init picam
+try:
+    iv = ivport.IVPort(ivport.TYPE_QUAD2, iv_jumper='A')
+    iv.close()
+    iv.camera_open()
+    print('IVPort initialized')
+except:
+    print('probably out of resources(other than memory) error')
+    iv.close()
+    iv.camera_open()
 
 #print('Initializing Camera.')
 #camera = picamera.PiCamera()
@@ -31,12 +44,42 @@ while True:
     if button_state == False:
         # sleep(0.75) allow time to adjust to light levels
         # camera.capture('image' + str(datetime.datetime.now()) + '.jpg')
-        test_ivport_quad.picam_capture()
-        labels1 = send_image("image1_CAM1.jpg")
-        print(labels1)
-        labels2 = send_image("image2_CAM2.jpg")
-        print(labels2)
+        #test_ivport_quad.picam_capture()
 
+        # IN THIS SCRIPT, IMAGE1 IS DEFINITELY THE LEFT CAM FROM THE PERSPECTIVE OF THE USER WEARING THE GLASSES
+
+        image_name_left = '/home/pi/Pictures/image_left'
+        image_name_right = '/home/pi/Pictures/image_right'
+
+        iv.camera_change(1)
+        iv.camera_capture(image_name_left, use_video_port=False) #+ str(datetime.now()), use_video_port=False)
+        print(str(dt.now()))
+        print('image 1 complete')
+        iv.camera_change(2)
+        iv.camera_capture(image_name_right, use_video_port=False) # + str(datetime.now()), use_video_port=False)
+        #print (str(datetime.now()))
+        print('image 2 complete')
+
+        print('sending left image to webserver...')
+        #labels1 = send_image("image1_CAM1.jpg")
+        image_name = '/home/pi/Downloads/image15.jpg'
+        response = send_images(image_name_left + '_CAM1.jpg', image_name_right + '_CAM2.jpg')
+        print(response)
+        #print('sending right image to webserver...')
+        #labels2 = send_image("image2_CAM2.jpg")
+        #print(labels2)
+        #i = vlc.Instance('--verbose 3')
+        
+        if labels1 == 'exit_sign':
+            os.system("omxplayer -o local exit_sign.mp3")
+        elif labels1 == 'bathroom_sign':
+            os.system("omxplayer -o local bathroom_sign.mp3")
+        else:
+            print('No label, not running audio')
+
+
+iv.close()
+print('IVPort closed')
 #camera.stop_preview()
 
 
