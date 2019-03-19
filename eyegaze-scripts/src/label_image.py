@@ -284,13 +284,13 @@ def get_detection_list_for_classification_dict(classification_dict, image_size):
 
 def get_response_string_with_image_paths(image1_path, image2_path):
   image1 = cv.imread(image1_path)
-  mtx1, dist1 = image_helper.get_calib_data_for_camera_type(constants.CameraType.PICAM_LEFT)
+  mtx1, dist1 = image_helper.get_calib_data_for_camera_type(constants.CameraType.EMERSON_IPHONE_6_PLUS)
   image1 = image_helper.undistort(image1, mtx1, dist1)
   image1_pil = cv.cvtColor(image1, cv.COLOR_BGR2RGB)
   image1_pil = Image.fromarray(image1_pil.astype('uint8'), 'RGB') # convert the image to a PIL image for tensorflow processing
 
   image2 = cv.imread(image2_path)
-  mtx2, dist2 = image_helper.get_calib_data_for_camera_type(constants.CameraType.PICAM_RIGHT)
+  mtx2, dist2 = image_helper.get_calib_data_for_camera_type(constants.CameraType.EMERSON_IPHONE_6_PLUS)
   image2 = image_helper.undistort(image2, mtx2, dist2)
   image2_pil = cv.cvtColor(image2, cv.COLOR_BGR2RGB)
   image2_pil = Image.fromarray(image2_pil.astype('uint8'), 'RGB') # convert the image to a PIL image for tensorflow processing
@@ -314,7 +314,8 @@ def get_response_string_with_image_paths(image1_path, image2_path):
 
     for match in stereo_matches_list:
       if util.is_in_box(match.left_pixel, detection.bounding_box):
-        depth = image_helper.calculate_depth(match.left_pixel, match.right_pixel, CameraType.PICAM_LEFT)
+        depth = image_helper.calculate_depth(match.left_pixel, match.right_pixel, CameraType.EMERSON_IPHONE_6_PLUS)
+        # angle = image_helper.calculate_angle_with_depth_and_pixel(image1, depth, match.left_pixel)
         response_string += '{} {} 30 '.format(str(detection.class_type), depth)
         found_depth = True
         break
@@ -328,8 +329,8 @@ def get_response_string_with_image_paths(image1_path, image2_path):
 
 
 def run():
-  image_left_path = '/home/emersonboyd/Desktop/asdf/left4.jpg'
-  image_right_path = '/home/emersonboyd/Desktop/asdf/right4.jpg'
+  image_left_path = '/home/emersonboyd/Desktop/asdf/left5.jpg'
+  image_right_path = '/home/emersonboyd/Desktop/asdf/right5.jpg'
   print(get_response_string_with_image_paths(image_left_path, image_right_path))
 
 

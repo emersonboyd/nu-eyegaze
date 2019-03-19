@@ -121,19 +121,10 @@ def calculate_depth(pixel_left, pixel_right, camera_type):
     x_left, y_left = pixel_left
     x_right, y_right = pixel_right
 
-    if camera_type == CameraType.EMERSON_IPHONE_6_PLUS:
-        micrometer_per_pixel = 1.5
-        focal_length_millimeter = 4.15
-        focal_length_pixel = focal_length_millimeter / (micrometer_per_pixel / 1000)
-        baseline_millimeter = 167
-    elif camera_type == CameraType.PICAM_LEFT or camera_type == CameraType.PICAM_RIGHT:
-        micrometer_per_pixel = 1.12
-        focal_length_millimeter = 3.04
-        focal_length_pixel = focal_length_millimeter / (micrometer_per_pixel / 1000)
-        baseline_millimeter = 102.3
-    else:
-        print('Invalid camera type entered')
-        exit(1)
+    micrometer_per_pixel = camera_type.get_pixel_size()
+    focal_length_millimeter = camera_type.get_focal_length()
+    focal_length_pixel = focal_length_millimeter / (micrometer_per_pixel / 1000)
+    baseline_millimeter = camera_type.get_baseline()
 
     # TODO consider NOT using both x disparity and y disparity combined
     import math

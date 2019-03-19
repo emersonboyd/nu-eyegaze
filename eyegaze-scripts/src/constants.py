@@ -2,9 +2,30 @@ from enum import Enum
 
 
 class CameraType(Enum):
-    PICAM_LEFT = 1
-    PICAM_RIGHT = 2
-    EMERSON_IPHONE_6_PLUS = 3
+    # 0: CAM_NUMBER
+    # 1: PIXEL_SIZE_MICROMETERS
+    # 2: FOCAL_LENGTH_MILLIMETERS
+    # 3: BASELINE_MILLIMETERS
+    # 4: HORIZONTAL_FIELD_OF_VIEW_DEGREES
+    # 5: VERTICAL_FIELD_OF_VIEW_DEGREES
+    PICAM_LEFT = 1, 1.12, 3.04, 102.3, 62.2, 48.8
+    PICAM_RIGHT = 2, 1.12, 3.04, 102.3, 62.2, 48.8
+    EMERSON_IPHONE_6_PLUS = 3, 1.5, 4.15, 167
+
+    def get_pixel_size(self):
+        return self.value[1]
+
+    def get_focal_length(self):
+        return self.value[2]
+
+    def get_baseline(self):
+        return self.value[3]
+
+    def get_horizontal_field_of_view(self):
+        return self.value[4]
+
+    def get_vertical_field_of_view(self):
+        return self.value[5]
 
 
 class ClassType(Enum):
