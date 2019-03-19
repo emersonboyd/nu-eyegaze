@@ -134,6 +134,23 @@ def calculate_depth(pixel_left, pixel_right, camera_type):
     return estimated_depth_millimeter / 1000
 
 
+# calculates the angle between a the user and a pixel in the image
+def calculate_angle_to_pixel(image, pixel, camera_type):
+    horizontal_fov_degrees = camera_type.get_horizontal_field_of_view()
+    degrees_per_half = horizontal_fov_degrees / 2
+
+    pixel_x = pixel[0]
+    center_x = image.shape[1] / 2
+
+    pixels_from_center_x = abs(center_x - pixel_x)
+    degrees_from_center = degrees_per_half * pixels_from_center_x / center_x
+
+    if pixel_x < center_x:
+        return -1 * degrees_from_center
+
+    return degrees_from_center
+
+
 def show_image_with_mark(image, pixel):
     x, y = pixel
 

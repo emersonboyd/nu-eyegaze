@@ -10,7 +10,7 @@ class CameraType(Enum):
     # 5: VERTICAL_FIELD_OF_VIEW_DEGREES
     PICAM_LEFT = 1, 1.12, 3.04, 102.3, 62.2, 48.8
     PICAM_RIGHT = 2, 1.12, 3.04, 102.3, 62.2, 48.8
-    EMERSON_IPHONE_6_PLUS = 3, 1.5, 4.15, 167
+    EMERSON_IPHONE_6_PLUS = 3, 1.5, 4.15, 167, 73 * 3/4, 73
 
     def get_pixel_size(self):
         return self.value[1]
