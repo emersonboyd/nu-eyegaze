@@ -72,6 +72,10 @@ while True:
         print(parsed_response)
 
         res_dir = util.get_resources_directory()
+
+        if len(parsed_response) == 0:
+                os.system('oxmplayer -o local {}/no_detection.mp3'.format(res_dir))
+
         for tup in parsed_response:
                 class_audio_file_name = '{}/{}'.format(res_dir, tup[0])
                 dist_audio_file_name = '{}/distance/{}'.format(res_dir, tup[1])

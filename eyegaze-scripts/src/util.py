@@ -60,8 +60,8 @@ def parse_server_response(s):
 	for i in range(0, len(s_split), 3):
 		print("Length of string split: " + str(len(s_split)))
 		class_audio_file = get_class_audio_file(s_split[i])
-		distance_audio_file = get_distance_audio_file(float(s_split[i+1]))
-		angle_audio_file = get_angle_audio_file(float(s_split[i+2]))
+		distance_audio_file = get_distance_audio_file(s_split[i+1])
+		angle_audio_file = get_angle_audio_file(s_split[i+2])
 		response_list.append((class_audio_file, distance_audio_file, angle_audio_file))
 
 	return response_list
@@ -75,6 +75,10 @@ def get_class_audio_file(class_string):
 
 
 def get_distance_audio_file(distance_float_m):
+	if distance_float_m == constants.INVALID_MEASUREMENT:
+		return 'feet_invalid.mp3'
+	distance_float_m = float(distance_float_m)
+
 	# invalid distance measurement
 	if distance_float_m < 0:
 		return 'feet_invalid.mp3'
@@ -100,6 +104,10 @@ def get_distance_audio_file(distance_float_m):
 
 
 def get_angle_audio_file(angle_float):
+        if angle_float == constants.INVALID_MEASUREMENT:
+                return 'angle_invalid.mp3'
+        angle_float = float(angle_float)
+
         # invalid distance measurement
         if angle_float < -55 or angle_float >= 55:
                 return 'angle_invalid.mp3'
