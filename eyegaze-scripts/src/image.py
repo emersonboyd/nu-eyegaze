@@ -12,6 +12,9 @@ from flask_client import send_images
 #import vlc
 import pygame
 import ivport
+from util import parse_server_response
+
+import util
 
 def init_button():
     GPIO.setmode(GPIO.BOARD)
@@ -62,26 +65,35 @@ while True:
 
         print('sending left image to webserver...')
         #labels1 = send_image("image1_CAM1.jpg")
-        image_name = '/home/pi/Downloads/image15.jpg'
         response = send_images(image_name_left + '_CAM1.jpg', image_name_right + '_CAM2.jpg')
-        print(response)
-        #print('sending right image to webserver...')
+        print('Raw response from server: {}'.format(response.text))
+
+        parsed_response = parse_server_response(response.text)
+        print(parsed_response)
+
+        res_dir = util.get_resources_directory()
+        for tup in parsed_response:
+                class_audio_file_name = '{}/{}'.format(res_dir, tup[0])
+                dist_audio_file_name = '{}/distance/{}'.format(res_dir, tup[1])
+                angle_audio_file_name = '{}/angle/{}'.format(res_dir, tup[2])
+                os.system('omxplayer -o local {}'.format(class_audio_file_name))
+                os.system('omxplayer -o local {}'.format(dist_audio_file_name))
+                os.system('omxplayer -o local {}'.format(angle_audio_file_name))
+
+	#print('sending right image to webserver...')
         #labels2 = send_image("image2_CAM2.jpg")
         #print(labels2)
         #i = vlc.Instance('--verbose 3')
-        
-        if labels1 == 'exit_sign':
-            os.system("omxplayer -o local exit_sign.mp3")
-        elif labels1 == 'bathroom_sign':
-            os.system("omxplayer -o local bathroom_sign.mp3")
-        else:
-            print('No label, not running audio')
+
+        #if labels1 == 'exit_sign':
+        #    os.system("omxplayer -o local exit_sign.mp3")
+        #elif labels1 == 'bathroom_sign':
+        #    os.system("omxplayer -o local bathroom_sign.mp3")
+        #else:
+        #    print('No label, not running audio')
 
 
 iv.close()
 print('IVPort closed')
 #camera.stop_preview()
-
-
-
 

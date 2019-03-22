@@ -45,13 +45,5 @@ def send_images(image_left_name, image_right_name, ip="35.185.63.125", port="500
     print(post_command)
     print(files)
     response = requests.post(post_command, files=files)
-    # 'class0' 'dist0(feet)' 'angle0(deg)' 'class1' 'dist1(feet)' 'angle1(deg)'
-    time.sleep(.1)
-    label_list = parse_labels(response.text.rstrip())
-    #for i in range(0, len(request.text.split(' ')), 2):
-    #    label = request.text[0]
-    if len(label_list) > 0:
-        return label_list[0]
-    return NO_LABEL
-
+    return response
 
