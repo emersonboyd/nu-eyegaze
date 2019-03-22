@@ -290,12 +290,16 @@ def get_response_string_with_image_paths(image1_path, image2_path):
   image1 = cv.imread(image1_path)
   mtx1, dist1 = image_helper.get_calib_data_for_camera_type(camera_type_left)
   image1 = image_helper.undistort(image1, mtx1, dist1)
+  print('image 1 shape before rotation: {}'.format(image1.shape))
+  image1 = np.rot90(image1, 1)
+  print('image 1 shape after rotation: {}'.format(image1.shape))
   image1_pil = cv.cvtColor(image1, cv.COLOR_BGR2RGB)
   image1_pil = Image.fromarray(image1_pil.astype('uint8'), 'RGB') # convert the image to a PIL image for tensorflow processing
 
   image2 = cv.imread(image2_path)
   mtx2, dist2 = image_helper.get_calib_data_for_camera_type(camera_type_right)
   image2 = image_helper.undistort(image2, mtx2, dist2)
+  image2 = np.rot90(image2, 1)
   image2_pil = cv.cvtColor(image2, cv.COLOR_BGR2RGB)
   image2_pil = Image.fromarray(image2_pil.astype('uint8'), 'RGB') # convert the image to a PIL image for tensorflow processing
 

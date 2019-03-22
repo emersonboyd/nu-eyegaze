@@ -89,7 +89,7 @@ def get_homography_matrix(image_left, image_right):
         pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
         dst = cv.perspectiveTransform(pts, M)
 
-        image_right = cv.polylines(image_right, [np.int32(dst)], True, 255, 3, cv.LINE_AA)
+        # image_right = cv.polylines(image_right, [np.int32(dst)], True, 255, 3, cv.LINE_AA)
 
     else:
         print("Not enough matches are found - {}/{}".format(len(good), IMAGE_HELPER_MIN_MATCH_COUNT))
