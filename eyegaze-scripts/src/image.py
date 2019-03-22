@@ -31,8 +31,6 @@ try:
     print('IVPort initialized')
 except:
     print('probably out of resources(other than memory) error')
-    iv.close()
-    iv.camera_open()
 
 #print('Initializing Camera.')
 #camera = picamera.PiCamera()
@@ -58,14 +56,16 @@ while True:
         iv.camera_capture(image_name_left, use_video_port=False) #+ str(datetime.now()), use_video_port=False)
         print(str(dt.now()))
         print('image 1 complete')
-        iv.camera_change(2)
+        #sleep(5)
+        iv.camera_change(3)
+        #sleep(5)
         iv.camera_capture(image_name_right, use_video_port=False) # + str(datetime.now()), use_video_port=False)
         #print (str(datetime.now()))
-        print('image 2 complete')
+        print('image 3 complete')
 
         print('sending left image to webserver...')
         #labels1 = send_image("image1_CAM1.jpg")
-        response = send_images(image_name_left + '_CAM1.jpg', image_name_right + '_CAM2.jpg')
+        response = send_images(image_name_left + '_CAM1.jpg', image_name_right + '_CAM3.jpg')
         print('Raw response from server: {}'.format(response.text))
 
         parsed_response = parse_server_response(response.text)
