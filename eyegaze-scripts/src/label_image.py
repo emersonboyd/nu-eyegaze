@@ -283,9 +283,10 @@ def get_detection_list_for_classification_dict(classification_dict, image_size):
 
 
 def get_response_string_with_image_paths(image1_path, image2_path):
-  camera_type_left = CameraType.EMERSON_IPHONE_6_PLUS
-  camera_type_right = CameraType.EMERSON_IPHONE_6_PLUS
-
+  camera_type_left = CameraType.PICAM_LEFT
+  camera_type_right = CameraType.PICAM_RIGHT
+  
+  print("Undistorting Images")
   image1 = cv.imread(image1_path)
   mtx1, dist1 = image_helper.get_calib_data_for_camera_type(camera_type_left)
   image1 = image_helper.undistort(image1, mtx1, dist1)
@@ -298,19 +299,25 @@ def get_response_string_with_image_paths(image1_path, image2_path):
   image2_pil = cv.cvtColor(image2, cv.COLOR_BGR2RGB)
   image2_pil = Image.fromarray(image2_pil.astype('uint8'), 'RGB') # convert the image to a PIL image for tensorflow processing
 
+  print("Classification step")
   image1_classification_dict = get_classification_dict_for_image(image1_pil)
   detection_list = get_detection_list_for_classification_dict(image1_classification_dict, image1_pil.size)
+
+  response_string = ''
+
+  # ignore any computer vistion code if signs are not detection
+  if len(detection_list) == 0:
+    return response_string
 
   # TODO handle case where homograohy matrix doesn't have a point in one or more of the bounding boxes (don't just crash out of nowhere)
   # TODO change all references to image1 to image_left and image2 as image_right
 
   _, kpL, kpR, good, matchesMask = image_helper.get_homography_matrix(image1, image2)
   stereo_matches_list = []
+  print("Calculating depth for each detection")
   for i, match in enumerate(matchesMask):
     if match:
       stereo_matches_list.append(StereoMatch(kpL[good[i].queryIdx].pt, kpR[good[i].trainIdx].pt))
-
-  response_string = ''
 
   for detection in detection_list:
     found_depth = False
@@ -319,6 +326,7 @@ def get_response_string_with_image_paths(image1_path, image2_path):
       if util.is_in_box(match.left_pixel, detection.bounding_box):
         depth = image_helper.calculate_depth(match.left_pixel, match.right_pixel, camera_type_left)
         angle = image_helper.calculate_angle_to_pixel(image1, match.left_pixel, camera_type_left)
+        print((str(detection.class_type), depth, angle))
         response_string += '{} {} {} '.format(str(detection.class_type), depth, angle)
         found_depth = True
         break
@@ -328,6 +336,8 @@ def get_response_string_with_image_paths(image1_path, image2_path):
       print('No feature matches located in the bounding box')
       exit(1)
 
+  print("Finished, responding with response_string:" + response_string)
+  response_string = response_string.rstrip() # remove tailing whitespace from response
   return response_string
 
 

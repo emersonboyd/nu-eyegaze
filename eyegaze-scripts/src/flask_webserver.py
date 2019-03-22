@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
-from label_image import label_image, get_response_string_with_image_path
+from label_image import label_image, get_response_string_with_image_paths
 from google.cloud import storage
 import os
 import socket
@@ -25,7 +25,8 @@ def run_model():
     image_right = request.files['image_right']
     image_right.save(os.path.join(app.config['UPLOAD_FOLDER'], 'image_right.jpg'))
     #labels = label_image(request.files)
-    labels = get_response_string_with_image_paths('image_left.jpg')
+    print("Images received.")
+    labels = get_response_string_with_image_paths('image_left.jpg', 'image_right.jpg')
     return labels
 
 
