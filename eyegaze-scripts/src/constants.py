@@ -1,5 +1,6 @@
 from enum import Enum
 
+INVALID_MEASUREMENT = "None"
 
 class CameraType(Enum):
     # 0: CAM_NUMBER

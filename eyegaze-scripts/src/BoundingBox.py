@@ -5,3 +5,5 @@ class BoundingBox:
         self.ymax = ymax
         self.xmax = xmax
 
+    def get_center_pixel(self):
+        return (((self.xmax + self.xmin) / 2), ((self.ymax + self.ymin) / 2))

@@ -334,7 +334,8 @@ def get_response_string_with_image_paths(image1_path, image2_path):
     if not found_depth:
       # here is the case where there are no matches detected in the bounding box
       print('No feature matches located in the bounding box')
-      exit(1)
+      angle = image_helper.calculate_angle_to_pixel(image1, detection.bounding_box.get_center_pixel(), camera_type_left)
+      response_string += '{} {} {} '.format(str(detection.class_type), constants.INVALID_MEASUREMENT, angle)
 
   print("Finished, responding with response_string:" + response_string)
   response_string = response_string.rstrip() # remove tailing whitespace from response
