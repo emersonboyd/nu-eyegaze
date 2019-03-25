@@ -81,7 +81,7 @@ def get_homography_matrix(image_left, image_right):
         src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
-        threshold = 8.0  # TODO perfect this number for the RPi
+        threshold = 10.0  # TODO perfect this number for the RPi
         M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, threshold)
         matchesMask = mask.ravel().tolist()
 

@@ -343,7 +343,11 @@ def get_response_string_with_image_paths(image1_path, image2_path):
     if not found_depth:
       # here is the case where there are no matches detected in the bounding box
       print('No feature matches located in the bounding box')
-      angle = image_helper.calculate_angle_to_pixel(image1, detection.bounding_box.get_center_pixel(), camera_type_left)
+      rot_for_angle = camera_type_left == CameraType.PICAM_LEFT or camera_type_left == CameraType.PICAM_RIGHT
+      image_for_angle = np.rot90(image1, 1) if rot_for_angle else image1
+      pixel_for_angle = (match.left_pixel[1], match.left_pixel[0]) if rot_for_angle else match.left_pixel
+      fov_degrees_for_angle = camera_type_left.get_vertical_field_of_view() if rot_for_angle else camera_type_left.get_horizontal_field_of_view()
+      angle = image_helper.calculate_angle_to_pixel(image_for_angle, pixel_for_angle, fov_degrees_for_angle)
       response_string += '{} {} {} '.format(str(detection.class_type), constants.INVALID_MEASUREMENT, angle)
 
   print("Finished, responding with response_string:" + response_string)
