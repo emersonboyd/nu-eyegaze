@@ -81,7 +81,7 @@ def get_homography_matrix(image_left, image_right):
         src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
-        threshold = 4.0  # TODO perfect this number for the RPi
+        threshold = 8.0  # TODO perfect this number for the RPi
         M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, threshold)
         matchesMask = mask.ravel().tolist()
 
@@ -89,7 +89,8 @@ def get_homography_matrix(image_left, image_right):
         pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
         dst = cv.perspectiveTransform(pts, M)
 
-        # image_right = cv.polylines(image_right, [np.int32(dst)], True, 255, 3, cv.LINE_AA)
+        image_right = np.ascontiguousarray(image_right, dtype=np.uint8)
+        image_right = cv.polylines(image_right, [np.int32(dst)], True, 255, 3, cv.LINE_AA)
 
     else:
         print("Not enough matches are found - {}/{}".format(len(good), IMAGE_HELPER_MIN_MATCH_COUNT))
@@ -127,16 +128,14 @@ def calculate_depth(pixel_left, pixel_right, camera_type):
     baseline_millimeter = camera_type.get_baseline()
 
     # TODO consider NOT using both x disparity and y disparity combined
-    import math
-    x_disparity_pixel = math.sqrt(math.pow(x_left - x_right, 2) + math.pow(abs(y_left - y_right), 2))
+    x_disparity_pixel = x_left - x_right
     estimated_depth_millimeter = baseline_millimeter * focal_length_pixel / x_disparity_pixel
 
     return estimated_depth_millimeter / 1000
 
 
 # calculates the angle between a the user and a pixel in the image
-def calculate_angle_to_pixel(image, pixel, camera_type):
-    horizontal_fov_degrees = camera_type.get_horizontal_field_of_view()
+def calculate_angle_to_pixel(image, pixel, horizontal_fov_degrees):
     degrees_per_half = horizontal_fov_degrees / 2
 
     pixel_x = pixel[0]

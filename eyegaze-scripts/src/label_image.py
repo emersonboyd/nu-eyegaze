@@ -291,18 +291,16 @@ def get_response_string_with_image_paths(image1_path, image2_path):
   
   print("Undistorting Images")
   image1 = cv.imread(image1_path)
-  # mtx1, dist1 = image_helper.get_calib_data_for_camera_type(camera_type_left)
-  # image1 = image_helper.undistort(image1, mtx1, dist1)
+  mtx1, dist1 = image_helper.get_calib_data_for_camera_type(camera_type_left)
+  image1 = image_helper.undistort(image1, mtx1, dist1)
   print('image 1 shape before rotation: {}'.format(image1.shape))
-  image1 = np.rot90(image1, 1)
   print('image 1 shape after rotation: {}'.format(image1.shape))
   image1_pil = cv.cvtColor(image1, cv.COLOR_BGR2RGB)
   image1_pil = Image.fromarray(image1_pil.astype('uint8'), 'RGB') # convert the image to a PIL image for tensorflow processing
 
   image2 = cv.imread(image2_path)
-  # mtx2, dist2 = image_helper.get_calib_data_for_camera_type(camera_type_right)
-  # image2 = image_helper.undistort(image2, mtx2, dist2)
-  image2 = np.rot90(image2, 1)
+  mtx2, dist2 = image_helper.get_calib_data_for_camera_type(camera_type_right)
+  image2 = image_helper.undistort(image2, mtx2, dist2)
   image2_pil = cv.cvtColor(image2, cv.COLOR_BGR2RGB)
   image2_pil = Image.fromarray(image2_pil.astype('uint8'), 'RGB') # convert the image to a PIL image for tensorflow processing
 
@@ -332,7 +330,11 @@ def get_response_string_with_image_paths(image1_path, image2_path):
     for match in stereo_matches_list:
       if util.is_in_box(match.left_pixel, detection.bounding_box):
         depth = image_helper.calculate_depth(match.left_pixel, match.right_pixel, camera_type_left)
-        angle = image_helper.calculate_angle_to_pixel(image1, match.left_pixel, camera_type_left)
+        rot_for_angle = camera_type_left == CameraType.PICAM_LEFT or camera_type_left == CameraType.PICAM_RIGHT
+        image_for_angle = np.rot90(image1, 1) if rot_for_angle else image1
+        pixel_for_angle = (match.left_pixel[1], match.left_pixel[0]) if rot_for_angle else match.left_pixel
+        fov_degrees_for_angle = camera_type_left.get_vertical_field_of_view() if rot_for_angle else camera_type_left.get_horizontal_field_of_view()
+        angle = image_helper.calculate_angle_to_pixel(image_for_angle, pixel_for_angle, fov_degrees_for_angle)
         print((str(detection.class_type), depth, angle))
         response_string += '{} {} {} '.format(str(detection.class_type), depth, angle)
         found_depth = True
@@ -350,8 +352,8 @@ def get_response_string_with_image_paths(image1_path, image2_path):
 
 
 def run():
-  image_left_path = '/home/emersonboyd/Desktop/asdf/left5.jpg'
-  image_right_path = '/home/emersonboyd/Desktop/asdf/right5.jpg'
+  image_left_path = '/home/emersonboyd/Desktop/asdf/left6.jpg'
+  image_right_path = '/home/emersonboyd/Desktop/asdf/right6.jpg'
   print(get_response_string_with_image_paths(image_left_path, image_right_path))
 
 
