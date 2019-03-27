@@ -25,6 +25,7 @@ from PIL import Image
 
 import cv2 as cv
 import util
+import time
 
 capture = cv.VideoCapture(0)
 
@@ -66,6 +67,7 @@ from include.models.research.object_detection.utils import visualization_utils a
 
 # What model to download.
 MODEL_NAME = 'rfcn_resnet101_coco_2018_01_28'
+MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
 MODEL_FILE = MODEL_NAME + '.tar.gz'
 MODEL_FILE_PATH = '{}/{}'.format(util.get_object_detection_directory(), MODEL_FILE)
 DOWNLOAD_BASE = 'http://download.tensorflow.org/models/object_detection/'
@@ -73,7 +75,7 @@ DOWNLOAD_BASE = 'http://download.tensorflow.org/models/object_detection/'
 PATH_TO_OBJECT_DETECTION = util.get_object_detection_directory()
 
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
-PATH_TO_FROZEN_GRAPH = PATH_TO_OBJECT_DETECTION + '/' + MODEL_NAME + '/frozen_inference_graph.pb'
+PATH_TO_FROZEN_GRAPH = PATH_TO_OBJECT_DETECTION + '/models/' + MODEL_NAME + '/frozen_inference_graph.pb'
 
 # List of the strings that is used to add correct label for each box.
 PATH_TO_LABELS = os.path.join(PATH_TO_OBJECT_DETECTION, 'data', 'mscoco_label_map.pbtxt')
@@ -179,8 +181,11 @@ def run_inference_for_single_image(image, graph):
       image_tensor = tf.get_default_graph().get_tensor_by_name('image_tensor:0')
 
       # Run inference
+      image_t = np.expand_dims(image, 0)
+      start_time = time.time()
       output_dict = sess.run(tensor_dict,
-                             feed_dict={image_tensor: np.expand_dims(image, 0)})
+                             feed_dict={image_tensor: image_t})
+      print('tensor session time: {}'.format(time.time() - start_time))
 
       # all outputs are float32 numpy arrays, so convert types as appropriate
       output_dict['num_detections'] = int(output_dict['num_detections'][0])
@@ -196,33 +201,87 @@ def run_inference_for_single_image(image, graph):
 # In[22]:
 
 
-# main loop to gather video feed
-while True:
+def main():
+  with tf.Session(graph=detection_graph) as sess:
+    start = time.time()
+    image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
+    # Each box represents a part of the image where a particular object was detected.
+    detection_boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
+    # Each score represent how level of confidence for each of the objects.
+    # Score is shown on the result image, together with the class label.
+    detection_scores = detection_graph.get_tensor_by_name('detection_scores:0')
+    detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
+    num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
-  ret, image_np = capture.read()
+    while True:
+      ret, image_np = capture.read()
 
-  # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-  image_np_expanded = np.expand_dims(image_np, axis=0)
-  # Actual detection.
-  output_dict = run_inference_for_single_image(image_np, detection_graph)
-  # Visualization of the results of a detection.
-  vis_util.visualize_boxes_and_labels_on_image_array(
-      image_np,
-      output_dict['detection_boxes'],
-      output_dict['detection_classes'],
-      output_dict['detection_scores'],
-      category_index,
-      instance_masks=output_dict.get('detection_masks'),
-      use_normalized_coordinates=True,
-      line_thickness=8)
+      # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+      image_np_expanded = np.expand_dims(image_np, axis=0)
 
-  # show the webcame capturing
-  cv.imshow('object detection', cv.resize(image_np, (int(1280/2),int(1024/2))))
+      # Actual detection.
+      start_time = time.time()
+      (boxes, scores, classes, num) = sess.run(
+        [detection_boxes, detection_scores, detection_classes, num_detections],
+        feed_dict={image_tensor: image_np_expanded})
+      print('session run time: {} seconds'.format(time.time() - start_time))
 
-  # end the code if the user presses 'q'
-  if cv.waitKey(25) & 0xFF == ord('q'):
-  	cv.destroyAllWindows()
-  	break
+      # Visualization of the results of a detection.
+      vis_util.visualize_boxes_and_labels_on_image_array(
+        image_np,
+        np.squeeze(boxes),
+        np.squeeze(classes).astype(np.int32),
+        np.squeeze(scores),
+        category_index,
+        use_normalized_coordinates=True,
+        line_thickness=2)
+
+      # show the webcame capturing
+      cv.imshow('object detection', cv.resize(image_np, (int(1280/2),int(1024/2))))
+
+      # end the code if the user presses 'q'
+      if cv.waitKey(25) & 0xFF == ord('q'):
+        cv.destroyAllWindows()
+        break
+
+  return
+
+  # main loop to gather video feed
+  # while True:
+  #
+  #   ret, image_np = capture.read()
+  #   print(image_np.shape)
+  #
+  #   # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+  #   start_time = time.time()
+  #   image_np_expanded = np.expand_dims(image_np, axis=0)
+  #   print('np expanstion time: {}'.format(time.time() - start_time))
+  #   # Actual detection.
+  #   start_time = time.time()
+  #   output_dict = run_inference_for_single_image(image_np, detection_graph)
+  #   print('classifcation time: {}'.format(time.time() - start_time))
+  #   # Visualization of the results of a detection.
+  #   # vis_util.visualize_boxes_and_labels_on_image_array(
+  #   #     image_np,
+  #   #     output_dict['detection_boxes'],
+  #   #     output_dict['detection_classes'],
+  #   #     output_dict['detection_scores'],
+  #   #     category_index,
+  #   #     instance_masks=output_dict.get('detection_masks'),
+  #   #     use_normalized_coordinates=True,
+  #   #     line_thickness=8)
+  #   #
+  #   # # show the webcame capturing
+  #   # cv.imshow('object detection', cv.resize(image_np, (int(1280/2),int(1024/2))))
+  #
+  #   # end the code if the user presses 'q'
+  #   if cv.waitKey(25) & 0xFF == ord('q'):
+  #     cv.destroyAllWindows()
+  #     break
+
+
+if __name__ == '__main__':
+  main()
 
 # In[ ]:
 
