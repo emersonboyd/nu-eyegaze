@@ -128,7 +128,9 @@ def calculate_depth(pixel_left, pixel_right, camera_type):
     baseline_millimeter = camera_type.get_baseline()
 
     # TODO consider NOT using both x disparity and y disparity combined
-    x_disparity_pixel = x_left - x_right
+    # x_disparity_pixel = x_left - x_right
+    import math
+    x_disparity_pixel = math.sqrt(math.pow(x_left - x_right, 2) + math.pow(y_left - y_right, 2))
     estimated_depth_millimeter = baseline_millimeter * focal_length_pixel / x_disparity_pixel
 
     return estimated_depth_millimeter / 1000

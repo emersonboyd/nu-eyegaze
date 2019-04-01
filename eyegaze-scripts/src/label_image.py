@@ -26,6 +26,8 @@ from google.protobuf import text_format
 from tensorflow.python.platform import gfile
 import util
 
+from matplotlib import pyplot as plt
+
 from BoundingBox import BoundingBox
 from DetectedObject import DetectedObject
 import image_helper
@@ -202,7 +204,7 @@ def load_image_into_numpy_array(image):
       (im_height, im_width, 3)).astype(np.uint8)
 
 
-def run_inference_for_single_image(image, graph):
+def run_inference_for_single_image(image_np_expanded, graph):
   with graph.as_default():
     with tf.Session() as sess:
       # Get handles to input and output tensors
@@ -237,7 +239,7 @@ def run_inference_for_single_image(image, graph):
       # Run inference
       start_time = time.time()
       output_dict = sess.run(tensor_dict,
-                             feed_dict={image_tensor: np.expand_dims(image, 0)})
+                             feed_dict={image_tensor: image_np_expanded})
       print('tf session run time: {} seconds'.format(time.time() - start_time))
 
       # all outputs are float32 numpy arrays, so convert types as appropriate
@@ -251,10 +253,9 @@ def run_inference_for_single_image(image, graph):
   return output_dict
 
 
-def get_classification_dict_for_image(image):
-  image_np = load_image_into_numpy_array(image)
+def get_classification_dict_for_image(image_np):
   image_np_expanded = np.expand_dims(image_np, axis=0)
-  output_dict = run_inference_for_single_image(image_np, detection_graph)
+  output_dict = run_inference_for_single_image(image_np_expanded, detection_graph)
 
   return output_dict
 
@@ -272,14 +273,14 @@ def get_string_for_classification_dict(d):
   return result_string
 
 
-def get_detection_list_for_classification_dict(classification_dict, image_size):
+def get_detection_list_for_classification_dict(classification_dict, image_width, image_height):
   boxes = classification_dict['detection_boxes']
   scores = classification_dict['detection_scores']
   classes = classification_dict['detection_classes']
   detection_list = []
   for i, box in enumerate(boxes):
     if scores[i] > MINIMUM_CONFIDENCE:
-      bounding_box = BoundingBox(xmin=box[1]*image_size[0], xmax=box[3]*image_size[0], ymin=box[0]*image_size[1], ymax=box[2]*image_size[1])
+      bounding_box = BoundingBox(xmin=box[1]*image_width, xmax=box[3]*image_width, ymin=box[0]*image_height, ymax=box[2]*image_height)
       detection_list.append(DetectedObject(constants.get_class_type_for_number(classes[i]), bounding_box))
 
   return detection_list
@@ -293,20 +294,17 @@ def get_response_string_with_image_paths(image1_path, image2_path):
   image1 = cv.imread(image1_path)
   mtx1, dist1 = image_helper.get_calib_data_for_camera_type(camera_type_left)
   image1 = image_helper.undistort(image1, mtx1, dist1)
-  print('image 1 shape before rotation: {}'.format(image1.shape))
-  print('image 1 shape after rotation: {}'.format(image1.shape))
-  image1_pil = cv.cvtColor(image1, cv.COLOR_BGR2RGB)
-  image1_pil = Image.fromarray(image1_pil.astype('uint8'), 'RGB') # convert the image to a PIL image for tensorflow processing
+  image1 = cv.cvtColor(image1, cv.COLOR_BGR2RGB)
+  # TODO check to ensure classification works better for RGB images than BGR
 
   image2 = cv.imread(image2_path)
   mtx2, dist2 = image_helper.get_calib_data_for_camera_type(camera_type_right)
   image2 = image_helper.undistort(image2, mtx2, dist2)
-  image2_pil = cv.cvtColor(image2, cv.COLOR_BGR2RGB)
-  image2_pil = Image.fromarray(image2_pil.astype('uint8'), 'RGB') # convert the image to a PIL image for tensorflow processing
+  image2 = cv.cvtColor(image2, cv.COLOR_BGR2RGB)
 
   print("Classification step")
-  image1_classification_dict = get_classification_dict_for_image(image1_pil)
-  detection_list = get_detection_list_for_classification_dict(image1_classification_dict, image1_pil.size)
+  image1_classification_dict = get_classification_dict_for_image(image1)
+  detection_list = get_detection_list_for_classification_dict(image1_classification_dict, image1.shape[1], image1.shape[0])
 
   response_string = ''
 
@@ -330,11 +328,7 @@ def get_response_string_with_image_paths(image1_path, image2_path):
     for match in stereo_matches_list:
       if util.is_in_box(match.left_pixel, detection.bounding_box):
         depth = image_helper.calculate_depth(match.left_pixel, match.right_pixel, camera_type_left)
-        rot_for_angle = camera_type_left == CameraType.PICAM_LEFT or camera_type_left == CameraType.PICAM_RIGHT
-        image_for_angle = np.rot90(image1, 1) if rot_for_angle else image1
-        pixel_for_angle = (match.left_pixel[1], match.left_pixel[0]) if rot_for_angle else match.left_pixel
-        fov_degrees_for_angle = camera_type_left.get_vertical_field_of_view() if rot_for_angle else camera_type_left.get_horizontal_field_of_view()
-        angle = image_helper.calculate_angle_to_pixel(image_for_angle, pixel_for_angle, fov_degrees_for_angle)
+        angle = image_helper.calculate_angle_to_pixel(image1, match.left_pixel, camera_type_left.get_horizontal_field_of_view())
         print((str(detection.class_type), depth, angle))
         response_string += '{} {} {} '.format(str(detection.class_type), depth, angle)
         found_depth = True
@@ -343,11 +337,7 @@ def get_response_string_with_image_paths(image1_path, image2_path):
     if not found_depth:
       # here is the case where there are no matches detected in the bounding box
       print('No feature matches located in the bounding box')
-      rot_for_angle = camera_type_left == CameraType.PICAM_LEFT or camera_type_left == CameraType.PICAM_RIGHT
-      image_for_angle = np.rot90(image1, 1) if rot_for_angle else image1
-      pixel_for_angle = (match.left_pixel[1], match.left_pixel[0]) if rot_for_angle else match.left_pixel
-      fov_degrees_for_angle = camera_type_left.get_vertical_field_of_view() if rot_for_angle else camera_type_left.get_horizontal_field_of_view()
-      angle = image_helper.calculate_angle_to_pixel(image_for_angle, pixel_for_angle, fov_degrees_for_angle)
+      angle = image_helper.calculate_angle_to_pixel(image1, match.left_pixel, camera_type_left.get_horizontal_field_of_view())
       response_string += '{} {} {} '.format(str(detection.class_type), constants.INVALID_MEASUREMENT, angle)
 
   print("Finished, responding with response_string:" + response_string)
