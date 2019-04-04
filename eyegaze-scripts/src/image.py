@@ -18,7 +18,7 @@ import util
 
 def init_button():
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(33, GPIO.IN, pull_up_down = GPIO.PUD_UP) #button to PIN 33/GPIO 13
+    GPIO.setup(40, GPIO.IN, pull_up_down = GPIO.PUD_UP) #button to PIN 33/GPIO 13
 
 print('Initializing button')
 init_button()
@@ -41,8 +41,9 @@ while True:
     # string = input()
     # if string == 'q':
         #exit()
-    button_state = GPIO.input(33)
+    button_state = GPIO.input(40)
     if button_state == False:
+        print("button was pressed!:")
         # sleep(0.75) allow time to adjust to light levels
         # camera.capture('image' + str(datetime.datetime.now()) + '.jpg')
         #test_ivport_quad.picam_capture()
