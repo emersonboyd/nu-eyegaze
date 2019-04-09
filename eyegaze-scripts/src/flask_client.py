@@ -29,7 +29,7 @@ def parse_labels(response_string):
     return label_list
 
 
-def send_images(image_left_name, image_right_name, ip="35.185.63.125", port="5000", command="inf"):
+def send_images(image_left_name, image_right_name, ip="73.100.56.111", port="5000", command="inf"):
     """
     Send an image to the Google Cloud Server
 
