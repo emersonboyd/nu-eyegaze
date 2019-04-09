@@ -1,0 +1,11 @@
+flask
+flask-cors
+numpy
+
+# also in /etc/rc.local we have to include:
+
+# sleep 10
+# python3 home/pi/nu-eyegaze/eyegaze-scripts/src/init_ivport.py
+# python3 home/pi/nu-eyegaze/eyegaze-scripts/src/image.py &
+# exit 0
+

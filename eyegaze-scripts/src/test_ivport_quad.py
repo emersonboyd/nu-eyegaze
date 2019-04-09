@@ -33,7 +33,7 @@ def picam_capture():
     iv.camera_change(1)
     iv.camera_capture("/home/pi/Pictures/image1" + str(datetime.now()), use_video_port=False)
     print (str(datetime.now()))
-    iv.camera_change(2)
+    iv.camera_change(3)
     iv.camera_capture("/home/pi/Pictures/image2" + str(datetime.now()), use_video_port=False)
     print (str(datetime.now()))
     iv.close()
@@ -49,8 +49,8 @@ def still_capture():
     iv = ivport.IVPort(ivport.TYPE_QUAD2, iv_jumper='A')
     iv.camera_change(1)
     capture(1)
-    iv.camera_change(2)
-    capture(2)
+    iv.camera_change(3)
+    capture(3)
     iv.close()
 
 # main capture examples
