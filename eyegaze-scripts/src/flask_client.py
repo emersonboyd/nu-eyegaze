@@ -47,3 +47,16 @@ def send_images(image_left_name, image_right_name, ip="35.185.63.125", port="500
     response = requests.post(post_command, files=files)
     return response
 
+
+def main():
+    command = 'hello'
+    port = '5000'
+    ip = '73.100.56.111'
+    post_command = 'http://' + ip + ':' + port + '/' + command
+    print(post_command)
+    response = requests.post(post_command)
+    print(response.text)
+
+
+if __name__ == '__main__':
+    main()

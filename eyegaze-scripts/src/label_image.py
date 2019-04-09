@@ -289,18 +289,32 @@ def get_detection_list_for_classification_dict(classification_dict, image_width,
 def get_response_string_with_image_paths(image1_path, image2_path):
   camera_type_left = CameraType.PICAM_LEFT
   camera_type_right = CameraType.PICAM_RIGHT
-  
+
+  #
+  # LOAD IMAGES FROM MEMORY
+  #
+
+  time_load_images = time.time()
+
   print("Undistorting Images")
   image1 = cv.imread(image1_path)
-  mtx1, dist1 = image_helper.get_calib_data_for_camera_type(camera_type_left)
-  image1 = image_helper.undistort(image1, mtx1, dist1)
+  # mtx1, dist1 = image_helper.get_calib_data_for_camera_type(camera_type_left)
+  # image1 = image_helper.undistort(image1, mtx1, dist1)
   image1 = cv.cvtColor(image1, cv.COLOR_BGR2RGB)
   # TODO check to ensure classification works better for RGB images than BGR
 
   image2 = cv.imread(image2_path)
-  mtx2, dist2 = image_helper.get_calib_data_for_camera_type(camera_type_right)
-  image2 = image_helper.undistort(image2, mtx2, dist2)
+  # mtx2, dist2 = image_helper.get_calib_data_for_camera_type(camera_type_right)
+  # image2 = image_helper.undistort(image2, mtx2, dist2)
   image2 = cv.cvtColor(image2, cv.COLOR_BGR2RGB)
+
+  time_load_images = time.time() - time_load_images
+
+  #
+  # GET CLASSIFICATION DICT AND CONVERT TO OUR OWN CLASSIFICATION DICTIONARY OBJECTS
+  #
+
+  time_classification_dict = time.time()
 
   print("Classification step")
   image1_classification_dict = get_classification_dict_for_image(image1)
@@ -310,10 +324,19 @@ def get_response_string_with_image_paths(image1_path, image2_path):
 
   # ignore any computer vistion code if signs are not detection
   if len(detection_list) == 0:
+    print('No detections found, returning empty string')
     return response_string
 
   # TODO handle case where homograohy matrix doesn't have a point in one or more of the bounding boxes (don't just crash out of nowhere)
   # TODO change all references to image1 to image_left and image2 as image_right
+
+  time_classification_dict = time.time() - time_classification_dict
+
+  #
+  # GET HOMOGRAPHY MATRIX AND CONVERT MATCHES TO OUR MATCH OBJECT
+  #
+
+  time_homography_matrix = time.time()
 
   _, kpL, kpR, good, matchesMask = image_helper.get_homography_matrix(image1, image2)
   stereo_matches_list = []
@@ -321,6 +344,14 @@ def get_response_string_with_image_paths(image1_path, image2_path):
   for i, match in enumerate(matchesMask):
     if match:
       stereo_matches_list.append(StereoMatch(kpL[good[i].queryIdx].pt, kpR[good[i].trainIdx].pt))
+
+  time_homography_matrix = time.time() - time_homography_matrix
+
+  #
+  # PARSE THROUGH MATCHES TO SEE IF WE CAN GET THE DEPTH FOR OUR OBJECTS
+  #
+
+  time_calculate_depth = time.time()
 
   for detection in detection_list:
     found_depth = False
@@ -340,14 +371,27 @@ def get_response_string_with_image_paths(image1_path, image2_path):
       angle = image_helper.calculate_angle_to_pixel(image1, match.left_pixel, camera_type_left.get_horizontal_field_of_view())
       response_string += '{} {} {} '.format(str(detection.class_type), constants.INVALID_MEASUREMENT, angle)
 
+  time_calculate_depth = time.time() - time_calculate_depth
+
+  #
+  # FINISH AND RETURN RESPONSE
+  #
+
+  print('Label image step 1 load images time: {} seconds'.format(time_load_images))
+  print('Label image step 2 classification dict time: {} seconds'.format(time_classification_dict))
+  print('Label image step 3 homography matrix time: {} seconds'.format(time_homography_matrix))
+  print('Label image step 4 calculate depth time: {} seconds'.format(time_calculate_depth))
+
   print("Finished, responding with response_string:" + response_string)
   response_string = response_string.rstrip() # remove tailing whitespace from response
   return response_string
 
 
 def run():
-  image_left_path = '/home/emersonboyd/Desktop/asdf/left6.jpg'
-  image_right_path = '/home/emersonboyd/Desktop/asdf/right6.jpg'
+  image_left_path = '/home/emersonboyd/Downloads/left6.jpg'
+  image_right_path = '/home/emersonboyd/Downloads/right6.jpg'
+  print(get_response_string_with_image_paths(image_left_path, image_right_path))
+  print(get_response_string_with_image_paths(image_left_path, image_right_path))
   print(get_response_string_with_image_paths(image_left_path, image_right_path))
 
 

@@ -53,7 +53,7 @@ def undistort(input_image, mtx, dist):
 
 def get_homography_matrix(image_left, image_right):
     # Initiate SIFT detector
-    sift = cv.xfeatures2d.SIFT_create()  # need opencv-python==3.4.2.17 and opencv-contrib-python==3.4.2.17
+    sift = cv.xfeatures2d.SIFT_create()  # need opencv-python==3.4.2.17 and opencv-contrib-python==3.4.2.17 or if that doesn't work then 3.4.2.16 for both
 
     # find the keypoints and descriptors with SIFT
     kp1, des1 = sift.detectAndCompute(image_left, None)
