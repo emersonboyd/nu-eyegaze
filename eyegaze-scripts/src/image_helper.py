@@ -5,6 +5,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 
+import itertools
+import time
+
 import util
 from constants import CameraType
 
@@ -52,20 +55,41 @@ def undistort(input_image, mtx, dist):
 
 
 def get_homography_matrix(image_left, image_right):
+    time_1 = time.time()
+
+    size_factor = 0.5
+    downsample_images = True
+
+    if downsample_images:
+        image_left = np.copy(image_left)
+        image_right = np.copy(image_right)
+        image_left = cv.blur(image_left, (5,5))
+        image_right = cv.blur(image_right, (5,5))
+        image_left = cv.resize(image_left, dsize=None, fx=size_factor, fy=size_factor)
+        image_right = cv.resize(image_right, dsize=None, fx=size_factor, fy=size_factor)
+
     # Initiate SIFT detector
     sift = cv.xfeatures2d.SIFT_create()  # need opencv-python==3.4.2.17 and opencv-contrib-python==3.4.2.17 or if that doesn't work then 3.4.2.16 for both
+
+    time_1 = time.time() - time_1
+    time_2 = time.time()
 
     # find the keypoints and descriptors with SIFT
     kp1, des1 = sift.detectAndCompute(image_left, None)
     kp2, des2 = sift.detectAndCompute(image_right, None)
+
+    time_2 = time.time() - time_2
+    time_3 = time.time()
 
     FLANN_INDEX_KDTREE = 0
     index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
     search_params = dict(checks=50)
 
     flann = cv.FlannBasedMatcher(index_params, search_params)
-
     matches = flann.knnMatch(des1, des2, k=2)
+
+    time_3 = time.time() - time_3
+    time_4 = time.time()
 
     # store all the good matches as per Lowe's ratio test.
     good = []
@@ -76,12 +100,19 @@ def get_homography_matrix(image_left, image_right):
     # show the matches before ransac filtering
     # img3 = cv.drawMatches(image_left, kp1, image_right, kp2, good, outImg=None, flags=2)
     # plt.imshow(img3, 'gray'), plt.show()
+    # cv.imwrite('/tmp/image_correspondences_raw.jpg', img3)
+
+    time_4 = time.time() - time_4
+    time_5 = time.time()
 
     if len(good) > IMAGE_HELPER_MIN_MATCH_COUNT:
         src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
-        threshold = 10.0  # TODO perfect this number for the RPi
+        threshold = 20.0  # TODO perfect this number for the RPi
+        if downsample_images:
+            threshold = threshold * size_factor
+
         M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, threshold)
         matchesMask = mask.ravel().tolist()
 
@@ -97,12 +128,32 @@ def get_homography_matrix(image_left, image_right):
         matchesMask = None
         exit(1)
 
+    time_5 = time.time() - time_5
+    time_6 = time.time()
+
     # draw_params = dict(matchColor=(0, 255, 0),  # draw matches in green color
     #                    singlePointColor=None,
     #                    matchesMask=matchesMask,  # draw only inliers
     #                    flags=2)
     # img3 = cv.drawMatches(image_left, kp1, image_right, kp2, good, None, **draw_params)
-    # plt.imshow(img3, 'gray'), plt.show()
+    # plt.imshow(img3, 'gray')
+    # plt.show()
+    # cv.imwrite('/tmp/image_correspondences_cleaned.jpg', img3)
+
+    if downsample_images:
+        for kp in itertools.chain(kp1, kp2):
+            kp.pt = (kp.pt[0] / size_factor, kp.pt[1] / size_factor)
+
+    time_6 = time.time() - time_6
+
+    print('\n\n\n')
+    print('Time 1: {} seconds'.format(time_1))
+    print('Time 2: {} seconds'.format(time_2))
+    print('Time 3: {} seconds'.format(time_3))
+    print('Time 4: {} seconds'.format(time_4))
+    print('Time 5: {} seconds'.format(time_5))
+    print('Time 6: {} seconds'.format(time_6))
+    print('\n\n\n')
 
     return M, kp1, kp2, good, matchesMask
 

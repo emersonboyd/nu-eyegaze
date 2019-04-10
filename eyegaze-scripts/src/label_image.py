@@ -39,6 +39,7 @@ include_path = '{}'.format(util.get_base_directory())
 print(include_path)
 sys.path.insert(0, include_path)
 from include.models.research.object_detection.utils import label_map_util
+from include.models.research.object_detection.utils import visualization_utils as vis_util
 
 import constants
 from constants import CameraType
@@ -257,6 +258,21 @@ def get_classification_dict_for_image(image_np):
   image_np_expanded = np.expand_dims(image_np, axis=0)
   output_dict = run_inference_for_single_image(image_np_expanded)
 
+  # visualization of the results of a detection.
+  # image_np_copy = np.copy(image_np)
+  # vis_util.visualize_boxes_and_labels_on_image_array(
+  #     image_np_copy,
+  #     output_dict['detection_boxes'],
+  #     output_dict['detection_classes'],
+  #     output_dict['detection_scores'],
+  #     category_index,
+  #     instance_masks=output_dict.get('detection_masks'),
+  #     use_normalized_coordinates=True,
+  #     line_thickness=8)
+
+  # show the label on the image
+  # cv.imwrite('/tmp/image_label.jpg', image_np_copy)
+
   return output_dict
 
 
@@ -281,7 +297,9 @@ def get_detection_list_for_classification_dict(classification_dict, image_width,
   for i, box in enumerate(boxes):
     if scores[i] > MINIMUM_CONFIDENCE:
       bounding_box = BoundingBox(xmin=box[1]*image_width, xmax=box[3]*image_width, ymin=box[0]*image_height, ymax=box[2]*image_height)
-      detection_list.append(DetectedObject(constants.get_class_type_for_number(classes[i]), bounding_box))
+      class_enum = constants.get_class_type_for_number(classes[i])
+      print('Located {} at {}'.format(str(class_enum), str(bounding_box)))
+      detection_list.append(DetectedObject(class_enum, bounding_box))
 
   return detection_list
 
@@ -368,7 +386,7 @@ def get_response_string_with_image_paths(image1_path, image2_path):
     if not found_depth:
       # here is the case where there are no matches detected in the bounding box
       print('No feature matches located in the bounding box')
-      angle = image_helper.calculate_angle_to_pixel(image1, match.left_pixel, camera_type_left.get_horizontal_field_of_view())
+      angle = image_helper.calculate_angle_to_pixel(image1, detection.bounding_box.get_center_pixel(), camera_type_left.get_horizontal_field_of_view())
       response_string += '{} {} {} '.format(str(detection.class_type), constants.INVALID_MEASUREMENT, angle)
 
   time_calculate_depth = time.time() - time_calculate_depth
@@ -388,8 +406,8 @@ def get_response_string_with_image_paths(image1_path, image2_path):
 
 
 def run():
-  image_left_path = '/home/emersonboyd/Downloads/left6.jpg'
-  image_right_path = '/home/emersonboyd/Downloads/right6.jpg'
+  image_left_path = '/home/emersonboyd/git_repo/nu-eyegaze/eyegaze-scripts/src/image_left.jpg'
+  image_right_path = '/home/emersonboyd/git_repo/nu-eyegaze/eyegaze-scripts/src/image_right.jpg'
   print(get_response_string_with_image_paths(image_left_path, image_right_path))
   print(get_response_string_with_image_paths(image_left_path, image_right_path))
   print(get_response_string_with_image_paths(image_left_path, image_right_path))
