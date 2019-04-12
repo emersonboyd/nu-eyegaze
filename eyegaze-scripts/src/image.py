@@ -12,9 +12,31 @@ from flask_client import send_images
 #import vlc
 import pygame
 import ivport
+import socket
+from urllib import request
 from util import parse_server_response
 
 import util
+
+
+socket.setdefaulttimeout(23)  # timeout in seconds
+
+url = 'http://google.com/'
+
+def check_wifi(url):
+    try :
+        response = request.urlopen(url)
+    except request.HTTPError as e:
+        #print('The server couldnt fulfill the request. Reason: ' + str(e.code))
+        return 'wifi disconnected'
+    except request.URLError as e:
+        #print('We failed to reach a server. Reason: ' + str(e.reason))
+        return 'wifi disconnected'
+    else :
+        html = response.read()
+        #print('Wifi connected!')
+        return 'WiFi connected!'
+
 
 def init_button():
     GPIO.setmode(GPIO.BOARD)
@@ -27,7 +49,8 @@ init_button()
 try:
     iv = ivport.IVPort(ivport.TYPE_QUAD2, iv_jumper='A')
     iv.close()
-    iv.camera_open()
+    # (3280,2464)
+    iv.camera_open(camera_v2=True, resolution=(1920,1080))
     print('IVPort initialized')
 except:
     print('probably out of resources(other than memory) error')
@@ -41,8 +64,13 @@ while True:
     # string = input()
     # if string == 'q':
         #exit()
+
     button_state = GPIO.input(40)
     if button_state == False:
+        if check_wifi(url) == 'wifi disconnected':
+            os.system('omxplayer -o local {}/wifi_disconnected.mp3'.format(res_dir))
+            print('wifi disconnected')
+            break
         print("button was pressed!:")
         # sleep(0.75) allow time to adjust to light levels
         # camera.capture('image' + str(datetime.datetime.now()) + '.jpg')
