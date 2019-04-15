@@ -6,6 +6,7 @@ from time import sleep
 import datetime
 import RPi.GPIO as GPIO
 import sys
+from time import sleep
 #sys.path.insert(0, 'home/pi/ivport-v2/')
 import test_ivport_quad
 #from flask_client import send_image
@@ -26,16 +27,17 @@ init_button()
 
 
 while True:
+    sleep(5) # sleep for five seconds
     # take pic using 'enter' on keyboard
     # string = input()
     # if string == 'q':
         #exit()
     button_state = GPIO.input(40)
-    if button_state == False:
+    if button_state == False or True:
         # sleep(0.75) allow time to adjust to light levels
         # camera.capture('image' + str(datetime.datetime.now()) + '.jpg')
         print("button pressed")
-        test_ivport_quad.picam_capture()
+        #test_ivport_quad.picam_capture()
         print("pictures taken")
         #print('sending left image to webserver...')
         #labels1 = send_image("image1_CAM1.jpg")
@@ -45,7 +47,9 @@ while True:
         #print(labels2)
         #i = vlc.Instance('--verbose 3')
         #if labels1 == 'exit_sign':
-        os.system("omxplayer -o local ../res/exit_sign.mp3")
+        os.system("omxplayer -o local ../res/exitsign_edit.mp3")
+        os.system("omxplayer -o local ../res/distance/10feet.mp3")
+        os.system("omxplayer -o local ../res/angle/1oclock.mp3")
         #else:
         #    os.system("omxplayer -o local bathroom_sign.mp3")
 

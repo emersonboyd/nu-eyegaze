@@ -13,6 +13,8 @@ from flask_client import send_images
 import pygame
 import ivport
 import socket
+from time import sleep
+
 from urllib import request
 from util import parse_server_response
 
@@ -50,7 +52,7 @@ try:
     iv = ivport.IVPort(ivport.TYPE_QUAD2, iv_jumper='A')
     iv.close()
     # (3280,2464)
-    iv.camera_open(camera_v2=True, resolution=(1920,1080))
+    #iv.camera_open(camera_v2=True, resolution=(1920,1080))
     print('IVPort initialized')
 except:
     print('probably out of resources(other than memory) error')
@@ -60,21 +62,23 @@ except:
 #camera.start_preview()
 
 while True:
+    sleep(0.005) # sleep for 5 milliseconds
     # take pic using 'enter' on keyboard
     # string = input()
     # if string == 'q':
         #exit()
-
+    res_dir = util.get_resources_directory()
     button_state = GPIO.input(40)
     if button_state == False:
         if check_wifi(url) == 'wifi disconnected':
-            os.system('omxplayer -o local {}/wifi_disconnected.mp3'.format(res_dir))
+            #os.system('omxplayer -o local {}/wifi_disconnected.m4a'.format(res_dir))
+            os.system('omxplayer -o local {}/wifidisconnected.mp3'.format(res_dir))
             print('wifi disconnected')
             break
         print("button was pressed!:")
         # sleep(0.75) allow time to adjust to light levels
         # camera.capture('image' + str(datetime.datetime.now()) + '.jpg')
-        #test_ivport_quad.picam_capture()
+        test_ivport_quad.picam_capture()
 
         # IN THIS SCRIPT, IMAGE1 IS DEFINITELY THE LEFT CAM FROM THE PERSPECTIVE OF THE USER WEARING THE GLASSES
 
@@ -103,7 +107,7 @@ while True:
         res_dir = util.get_resources_directory()
 
         if len(parsed_response) == 0:
-                os.system('omxplayer -o local {}/no_detection.mp3'.format(res_dir))
+                os.system('omxplayer -o local {}/no_objects_detected.mp3'.format(res_dir))
 
         for tup in parsed_response:
                 class_audio_file_name = '{}/{}'.format(res_dir, tup[0])
