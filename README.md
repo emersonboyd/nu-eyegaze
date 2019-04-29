@@ -1,6 +1,8 @@
 # NU Eyegaze Capstone
 Optical Character Recognition and Sign Detection Glasses for the Visually Impaired
 
+[Project Description](https://docs.google.com/presentation/d/1Eew1FWWk76oY9wtT70f1i_0qqgfPZqYRX5wbpYT6G0Q/edit?usp=sharing)
+
 [Youtube Video Demonstration](https://youtu.be/peDaGbRYc8M)
 
 Group Members: 
